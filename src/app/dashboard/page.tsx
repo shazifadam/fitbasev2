@@ -1,18 +1,42 @@
-import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { createServerClient } from '@/lib/supabase/server'
+import { getAttendanceForDate, getTrainerProfile } from '@/actions/dashboard'
+import { DashboardView } from './dashboard-view'
+import { BottomNav } from '@/components/layout/bottom-nav'
 
-export default async function DashboardPage() {
+function todayString(): string {
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ date?: string }>
+}) {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) redirect('/login')
 
+  const params = await searchParams
+  const date = params.date ?? todayString()
+
+  const [attendance, trainer] = await Promise.all([
+    getAttendanceForDate(date),
+    getTrainerProfile(),
+  ])
+
   return (
-    <main className="min-h-screen bg-neutral-100 pb-20">
-      <div className="px-4 pt-6">
-        <h1 className="text-2xl font-medium text-neutral-950 mb-1">Dashboard</h1>
-        <p className="text-sm text-neutral-500">MVP 1 — Session flow coming next</p>
-      </div>
-    </main>
+    <>
+      <DashboardView
+        date={date}
+        attendance={attendance}
+        trainerName={trainer?.display_name ?? 'Trainer'}
+      />
+      <BottomNav />
+    </>
   )
 }
