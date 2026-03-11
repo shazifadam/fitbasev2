@@ -47,7 +47,6 @@ type Props = {
 export function DashboardView({ date, attendance, trainerName }: Props) {
   const router = useRouter()
 
-  const scheduled = attendance.filter(a => a.status === 'scheduled')
   const attending = attendance.filter(a => a.status === 'attending')
   const scheduledAndAttending = attendance.filter(
     a => a.status === 'scheduled' || a.status === 'attending'
@@ -102,14 +101,10 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
 
         {/* Summary Banner */}
         <div className="flex items-center justify-between rounded-base bg-neutral-800 px-4 py-4">
-          <span className="text-[15px] font-medium text-white">
-            {attending.length > 0 ? 'Attending' : 'Clients for the day'}
-          </span>
+          <span className="text-[15px] font-medium text-white">Attending</span>
           <div className="flex items-center justify-center rounded-full bg-white/[0.13] px-[14px] py-[6px]">
             <span className="text-[13px] font-medium text-white">
-              {attending.length > 0
-                ? `${attending.length} attending`
-                : `${scheduled.length} clients`}
+              {attending.length} attending
             </span>
           </div>
         </div>
