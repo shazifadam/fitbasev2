@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
-import { X, Play, Check } from 'lucide-react'
+import { Cancel01Icon, PlayIcon, Tick01Icon } from 'hugeicons-react'
 import {
   BottomDrawer,
   BottomDrawerContent,
@@ -50,7 +50,7 @@ export function SelectWorkoutDrawer({ open, attendance, onClose }: Props) {
           <div className="flex items-center justify-between">
             <span className="text-xl font-medium text-neutral-950">Select Workout</span>
             <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
-              <X size={24} />
+              <Cancel01Icon size={24} color="currentColor" />
             </button>
           </div>
 
@@ -97,7 +97,7 @@ export function SelectWorkoutDrawer({ open, attendance, onClose }: Props) {
                   </div>
                   {isSelected && (
                     <div className="relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-800">
-                      <Check size={14} className="text-white" strokeWidth={2.5} />
+                      <Tick01Icon size={14} color="white" />
                     </div>
                   )}
                 </button>
@@ -113,7 +113,7 @@ export function SelectWorkoutDrawer({ open, attendance, onClose }: Props) {
             disabled={isPending}
             className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
           >
-            <Play size={16} className="fill-white stroke-none" />
+            <PlayIcon size={16} color="white" />
             {isPending ? 'Starting…' : 'Start Session'}
           </button>
 

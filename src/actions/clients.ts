@@ -28,6 +28,57 @@ export type CreateClientInput = {
   session_times: Record<string, string>
 }
 
+// ─── Attendance Auto-Generation ───────────────────────────────────────────────
+
+const DAY_TO_NUM: Record<string, number> = {
+  Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+}
+
+function getScheduleDays(scheduleSet: string, customDays: string[]): string[] {
+  if (scheduleSet === 'sunday')   return ['Sun', 'Tue', 'Thu']
+  if (scheduleSet === 'saturday') return ['Sat', 'Mon', 'Wed']
+  return customDays
+}
+
+function generateAttendanceRecords(
+  clientId: string,
+  trainerId: string,
+  days: string[],
+  sessionTimes: Record<string, string>,
+  fromDateStr: string,
+  weeks = 8,
+) {
+  const [y, m, d] = fromDateStr.split('-').map(Number)
+  const start = new Date(y, m - 1, d)
+  const records = []
+
+  for (const day of days) {
+    const dayNum = DAY_TO_NUM[day]
+    if (dayNum === undefined) continue
+    const time = sessionTimes[day] ?? '06:00'
+
+    const curr = new Date(start)
+    const diff = (dayNum - curr.getDay() + 7) % 7
+    curr.setDate(curr.getDate() + diff)
+
+    for (let i = 0; i < weeks; i++) {
+      const yyyy = curr.getFullYear()
+      const mm = String(curr.getMonth() + 1).padStart(2, '0')
+      const dd = String(curr.getDate()).padStart(2, '0')
+      records.push({
+        client_id: clientId,
+        trainer_id: trainerId,
+        scheduled_date: `${yyyy}-${mm}-${dd}`,
+        scheduled_time: time,
+        status: 'scheduled',
+      })
+      curr.setDate(curr.getDate() + 7)
+    }
+  }
+
+  return records
+}
+
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 export async function getClients(): Promise<ClientRow[]> {
@@ -93,7 +144,9 @@ export async function createClient(
 
   if (!trainer) return { error: 'Trainer profile not found. Please sign out and sign in again.' }
 
-  const { error } = await supabase
+  const trainerId = (trainer as { id: string }).id
+
+  const { data: client, error } = await supabase
     .from('clients')
     .insert({
       name: input.name,
@@ -103,11 +156,31 @@ export async function createClient(
       schedule_set: input.schedule_set,
       custom_days: input.custom_days,
       session_times: input.session_times,
-      trainer_id: (trainer as { id: string }).id,
+      trainer_id: trainerId,
     })
+    .select('id')
+    .single()
 
   if (error) return { error: error.message }
+  if (!client) return { error: 'Failed to create client' }
+
+  // Auto-generate attendance records for the next 8 weeks
+  const today = new Date()
+  const fromDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  const days = getScheduleDays(input.schedule_set, input.custom_days)
+  const attendanceRows = generateAttendanceRecords(
+    (client as { id: string }).id,
+    trainerId,
+    days,
+    input.session_times,
+    fromDate,
+  )
+
+  if (attendanceRows.length > 0) {
+    await supabase.from('attendance').insert(attendanceRows)
+  }
 
   revalidatePath('/clients')
+  revalidatePath('/dashboard')
   return {}
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Calendar, X } from 'lucide-react'
+import { Calendar01Icon, Cancel01Icon } from 'hugeicons-react'
 import {
   BottomDrawer,
   BottomDrawerContent,
@@ -52,7 +52,7 @@ export function SessionActionDrawer({ open, attendance, onClose, onStartSession 
           <div className="flex items-center justify-between">
             <span className="text-xl font-medium text-neutral-950">Mark Attendance</span>
             <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
-              <X size={24} />
+              <Cancel01Icon size={24} color="currentColor" />
             </button>
           </div>
 
@@ -65,7 +65,7 @@ export function SessionActionDrawer({ open, attendance, onClose, onStartSession 
               {attendance?.clients?.name}
             </span>
             <div className="flex items-center gap-2">
-              <Calendar size={18} className="text-neutral-400 shrink-0" />
+              <Calendar01Icon size={18} color="currentColor" className="text-neutral-400 shrink-0" />
               <span className="text-[15px] font-normal text-neutral-500">
                 {attendance
                   ? formatSessionDateTime(attendance.scheduled_date, attendance.scheduled_time)

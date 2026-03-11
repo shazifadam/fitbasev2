@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, GripVertical } from 'lucide-react'
+import { Search01Icon, DragDropVerticalIcon } from 'hugeicons-react'
 import type { ClientRow } from '@/actions/clients'
 
 const FILTER_TABS = [
@@ -57,7 +57,7 @@ export function ClientsView({ clients, trainerInitials }: Props) {
 
         {/* Search */}
         <div className="flex items-center gap-2 h-11 px-3 bg-white rounded-base border border-neutral-200">
-          <Search size={18} className="text-neutral-400 shrink-0" />
+          <Search01Icon size={18} color="currentColor" className="text-neutral-400 shrink-0" />
           <input
             type="text"
             placeholder="Search clients..."
@@ -119,7 +119,7 @@ export function ClientsView({ clients, trainerInitials }: Props) {
                   )}
                 </div>
               </div>
-              <GripVertical size={18} className="text-neutral-300 shrink-0" />
+              <DragDropVerticalIcon size={18} color="currentColor" className="text-neutral-300 shrink-0" />
             </button>
           ))}
         </div>

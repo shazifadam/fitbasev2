@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, GripVertical, CircleCheck, CircleX } from 'lucide-react'
+import { ArrowDown01Icon, DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from 'hugeicons-react'
 import type { AttendanceWithClient } from '@/actions/dashboard'
 import { SessionActionDrawer } from '@/components/dashboard/session-action-drawer'
 import { SelectWorkoutDrawer } from '@/components/dashboard/select-workout-drawer'
@@ -95,7 +95,7 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
           <span className="text-[15px] font-medium text-neutral-950">
             {formatDateLabel(date)}
           </span>
-          <ChevronDown size={20} className="text-neutral-400 shrink-0" />
+          <ArrowDown01Icon size={20} color="currentColor" className="text-neutral-400 shrink-0" />
           <input
             type="date"
             value={date}
@@ -132,7 +132,7 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
                     {formatPrograms(item.clients?.training_programs)}
                   </span>
                 </div>
-                <GripVertical size={18} className="text-neutral-300 shrink-0" />
+                <DragDropVerticalIcon size={18} color="currentColor" className="text-neutral-300 shrink-0" />
               </button>
             ))}
           </div>
@@ -160,7 +160,7 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
                     </span>
                   )}
                 </div>
-                <CircleCheck size={20} className="text-success-600 shrink-0" />
+                <CheckmarkCircle01Icon size={20} color="currentColor" className="text-success-600 shrink-0" />
               </div>
             ))}
           </div>
@@ -183,7 +183,7 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
                     {formatPrograms(item.clients?.training_programs)}
                   </span>
                 </div>
-                <CircleX size={20} className="text-danger-600 shrink-0" />
+                <CancelCircleIcon size={20} color="currentColor" className="text-danger-600 shrink-0" />
               </div>
             ))}
           </div>

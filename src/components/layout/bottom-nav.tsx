@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, BarChart2, MoreHorizontal, Plus } from 'lucide-react'
+import { Home01Icon, UserGroupIcon, BarChartIcon, MoreHorizontalIcon, Add01Icon } from 'hugeicons-react'
 import { cn } from '@/lib/utils'
 
 // ─── Bottom Navigation ────────────────────────────────────────────────────
@@ -14,10 +14,10 @@ import { cn } from '@/lib/utils'
 // ──────────────────────────────────────────────────────────────────────────
 
 const navItems = [
-  { href: '/dashboard', icon: Home, label: 'Home' },
-  { href: '/clients', icon: Users, label: 'Clients' },
-  { href: '/stats', icon: BarChart2, label: 'Stats' },
-  { href: '/more', icon: MoreHorizontal, label: 'More' },
+  { href: '/dashboard', icon: Home01Icon,        label: 'Home' },
+  { href: '/clients',   icon: UserGroupIcon,      label: 'Clients' },
+  { href: '/stats',     icon: BarChartIcon,       label: 'Stats' },
+  { href: '/more',      icon: MoreHorizontalIcon, label: 'More' },
 ]
 
 export function BottomNav() {
@@ -42,6 +42,7 @@ export function BottomNav() {
               >
                 <Icon
                   size={24}
+                  color="currentColor"
                   className={cn(
                     isActive ? 'text-neutral-800' : 'text-neutral-400'
                   )}
@@ -70,7 +71,7 @@ function FabButton() {
       className="flex h-14 w-14 items-center justify-center rounded-full bg-fab text-white shadow-fab hover:bg-fab-hover active:bg-fab-active -mt-6 transition-colors"
       aria-label="Add client"
     >
-      <Plus size={24} />
+      <Add01Icon size={24} color="white" />
     </Link>
   )
 }
