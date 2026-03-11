@@ -23,7 +23,8 @@ export type CreateClientInput = {
   phone: string
   training_programs: string[]
   tier_id: string | null
-  schedule_set: string
+  schedule_set: 'sunday' | 'saturday' | 'custom'
+  custom_days: string[]
   session_times: Record<string, string>
 }
 
@@ -100,6 +101,7 @@ export async function createClient(
       training_programs: input.training_programs,
       tier_id: input.tier_id || null,
       schedule_set: input.schedule_set,
+      custom_days: input.custom_days,
       session_times: input.session_times,
       trainer_id: (trainer as { id: string }).id,
     })

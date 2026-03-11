@@ -9,63 +9,78 @@ import { createClient, type TierRow } from '@/actions/clients'
 
 const TRAINING_PROGRAMS = ['Strength', 'Body-Trans', 'Cardio', 'HIIT']
 
-const SCHEDULE_DAYS: Record<string, string[]> = {
-  'Sun Set': ['Sun', 'Mon', 'Wed'],
-  'Sat Set': ['Sat', 'Mon', 'Thu'],
-  'Custom':  ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+const ALL_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+type ScheduleOption = 'Sun Set' | 'Sat Set' | 'Custom'
+
+const SCHEDULE_CONFIG: Record<ScheduleOption, { dbValue: 'sunday' | 'saturday' | 'custom'; days: string[] }> = {
+  'Sun Set': { dbValue: 'sunday',   days: ['Sun', 'Tue', 'Thu'] },
+  'Sat Set': { dbValue: 'saturday', days: ['Sat', 'Mon', 'Wed'] },
+  'Custom':  { dbValue: 'custom',   days: [] },
 }
 
 const DEFAULT_TIME = '06:00'
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-type Props = {
-  tiers: TierRow[]
-}
+type Props = { tiers: TierRow[] }
 
 export function AddClientForm({ tiers }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [programs, setPrograms] = useState<string[]>([])
-  const [tierId, setTierId] = useState<string>('')
-  const [scheduleSet, setScheduleSet] = useState<string>('Sun Set')
+  const [name, setName]               = useState('')
+  const [phone, setPhone]             = useState('')
+  const [programs, setPrograms]       = useState<string[]>([])
+  const [tierId, setTierId]           = useState('')
+  const [scheduleSet, setScheduleSet] = useState<ScheduleOption>('Sun Set')
+  const [customDays, setCustomDays]   = useState<string[]>([])
   const [sessionTimes, setSessionTimes] = useState<Record<string, string>>({
-    Sun: DEFAULT_TIME,
-    Mon: DEFAULT_TIME,
-    Wed: DEFAULT_TIME,
+    Sun: DEFAULT_TIME, Tue: DEFAULT_TIME, Thu: DEFAULT_TIME,
   })
   const [error, setError] = useState<string | null>(null)
 
-  const days = SCHEDULE_DAYS[scheduleSet] ?? []
+  // Active days for time-slot display
+  const activeDays = scheduleSet === 'Custom' ? customDays : SCHEDULE_CONFIG[scheduleSet].days
 
-  function handleScheduleSetChange(val: string) {
+  function handleScheduleSetChange(val: ScheduleOption) {
     setScheduleSet(val)
-    // Reset session times for new days
-    const newDays = SCHEDULE_DAYS[val] ?? []
-    const times: Record<string, string> = {}
-    newDays.forEach(day => {
-      times[day] = sessionTimes[day] ?? DEFAULT_TIME
-    })
-    setSessionTimes(times)
+    if (val !== 'Custom') {
+      const newDays = SCHEDULE_CONFIG[val].days
+      const times: Record<string, string> = {}
+      newDays.forEach(d => { times[d] = sessionTimes[d] ?? DEFAULT_TIME })
+      setSessionTimes(times)
+    }
   }
 
-  function toggleProgram(program: string) {
-    setPrograms(prev =>
-      prev.includes(program) ? prev.filter(p => p !== program) : [...prev, program]
-    )
+  function toggleCustomDay(day: string) {
+    setCustomDays(prev => {
+      const next = prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+      // Preserve existing times, add default for new day
+      if (!prev.includes(day)) {
+        setSessionTimes(t => ({ ...t, [day]: t[day] ?? DEFAULT_TIME }))
+      }
+      return next
+    })
   }
 
   function handleTimeChange(day: string, value: string) {
     setSessionTimes(prev => ({ ...prev, [day]: value }))
   }
 
+  function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
+    // Allow digits, +, spaces only
+    const val = e.target.value.replace(/[^\d+\s]/g, '')
+    setPhone(val)
+  }
+
   function handleSubmit() {
-    if (!name.trim()) { setError('Client name is required'); return }
-    if (!phone.trim()) { setError('Phone number is required'); return }
-    if (programs.length === 0) { setError('Select at least one training program'); return }
+    if (!name.trim())           { setError('Client name is required'); return }
+    if (!phone.trim())          { setError('Phone number is required'); return }
+    if (programs.length === 0)  { setError('Select at least one training program'); return }
+    if (scheduleSet === 'Custom' && customDays.length === 0) {
+      setError('Select at least one day for the custom schedule'); return
+    }
     setError(null)
 
     startTransition(async () => {
@@ -74,14 +89,12 @@ export function AddClientForm({ tiers }: Props) {
         phone: phone.trim(),
         training_programs: programs,
         tier_id: tierId || null,
-        schedule_set: scheduleSet,
+        schedule_set: SCHEDULE_CONFIG[scheduleSet].dbValue,
+        custom_days: scheduleSet === 'Custom' ? customDays : [],
         session_times: sessionTimes,
       })
-      if (result.error) {
-        setError(result.error)
-      } else {
-        router.push('/clients')
-      }
+      if (result.error) setError(result.error)
+      else router.push('/clients')
     })
   }
 
@@ -91,11 +104,7 @@ export function AddClientForm({ tiers }: Props) {
 
         {/* Header */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="text-neutral-950"
-            aria-label="Go back"
-          >
+          <button onClick={() => router.back()} className="text-neutral-950" aria-label="Go back">
             ←
           </button>
           <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px]">
@@ -118,14 +127,15 @@ export function AddClientForm({ tiers }: Props) {
             />
           </div>
 
-          {/* Phone Number */}
+          {/* Phone Number — numeric keypad on mobile */}
           <div className="flex flex-col gap-1.5">
             <label className="text-[14px] font-medium text-neutral-950">Phone Number</label>
             <input
               type="tel"
+              inputMode="numeric"
               placeholder="+966 5XX XXX XXXX"
               value={phone}
-              onChange={e => setPhone(e.target.value)}
+              onChange={handlePhoneChange}
               className="h-12 rounded-base border border-neutral-200 px-[14px] text-[14px] font-normal text-neutral-950 placeholder:text-neutral-400 outline-none focus:border-neutral-800 bg-white"
             />
           </div>
@@ -140,12 +150,12 @@ export function AddClientForm({ tiers }: Props) {
                   <button
                     key={program}
                     type="button"
-                    onClick={() => toggleProgram(program)}
+                    onClick={() => setPrograms(prev =>
+                      prev.includes(program) ? prev.filter(p => p !== program) : [...prev, program]
+                    )}
                     className={[
                       'rounded-base px-[14px] py-2 text-[13px] font-normal transition-colors',
-                      selected
-                        ? 'bg-neutral-800 text-white'
-                        : 'bg-neutral-100 text-neutral-950',
+                      selected ? 'bg-neutral-800 text-white' : 'bg-neutral-100 text-neutral-950',
                     ].join(' ')}
                   >
                     {program}
@@ -169,10 +179,7 @@ export function AddClientForm({ tiers }: Props) {
                   <option key={tier.id} value={tier.id}>{tier.name}</option>
                 ))}
               </select>
-              <ChevronDown
-                size={18}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
-              />
+              <ChevronDown size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
             </div>
           </div>
 
@@ -180,7 +187,7 @@ export function AddClientForm({ tiers }: Props) {
           <div className="flex flex-col gap-2">
             <label className="text-[14px] font-medium text-neutral-950">Schedule Set</label>
             <div className="flex flex-col gap-2.5">
-              {Object.keys(SCHEDULE_DAYS).map(option => {
+              {(Object.keys(SCHEDULE_CONFIG) as ScheduleOption[]).map(option => {
                 const selected = scheduleSet === option
                 return (
                   <button
@@ -191,38 +198,58 @@ export function AddClientForm({ tiers }: Props) {
                   >
                     <div className={[
                       'flex h-5 w-5 shrink-0 items-center justify-center rounded-full',
-                      selected
-                        ? 'border-2 border-neutral-800'
-                        : 'border-[1.5px] border-neutral-300',
+                      selected ? 'border-2 border-neutral-800' : 'border-[1.5px] border-neutral-300',
                     ].join(' ')}>
-                      {selected && (
-                        <div className="h-2 w-2 rounded-full bg-neutral-800" />
-                      )}
+                      {selected && <div className="h-2 w-2 rounded-full bg-neutral-800" />}
                     </div>
                     <span className="text-[14px] font-normal text-neutral-950">{option}</span>
                   </button>
                 )
               })}
             </div>
+
+            {/* Custom day checkboxes */}
+            {scheduleSet === 'Custom' && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {ALL_DAYS.map(day => {
+                  const checked = customDays.includes(day)
+                  return (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => toggleCustomDay(day)}
+                      className={[
+                        'rounded-base px-3 py-1.5 text-[13px] font-normal transition-colors',
+                        checked ? 'bg-neutral-800 text-white' : 'bg-neutral-100 text-neutral-950',
+                      ].join(' ')}
+                    >
+                      {day}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Session Times */}
-          <div className="flex flex-col gap-2">
-            <label className="text-[14px] font-medium text-neutral-950">Session Times</label>
+          {/* Session Times — only for active days */}
+          {activeDays.length > 0 && (
             <div className="flex flex-col gap-2">
-              {days.map(day => (
-                <div key={day} className="flex items-center gap-3">
-                  <span className="w-9 text-[14px] font-medium text-neutral-950 shrink-0">{day}</span>
-                  <input
-                    type="time"
-                    value={sessionTimes[day] ?? DEFAULT_TIME}
-                    onChange={e => handleTimeChange(day, e.target.value)}
-                    className="flex-1 h-11 rounded-base border border-neutral-200 px-[14px] text-[14px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
-                  />
-                </div>
-              ))}
+              <label className="text-[14px] font-medium text-neutral-950">Session Times</label>
+              <div className="flex flex-col gap-2">
+                {activeDays.map(day => (
+                  <div key={day} className="flex items-center gap-3">
+                    <span className="w-9 text-[14px] font-medium text-neutral-950 shrink-0">{day}</span>
+                    <input
+                      type="time"
+                      value={sessionTimes[day] ?? DEFAULT_TIME}
+                      onChange={e => handleTimeChange(day, e.target.value)}
+                      className="flex-1 h-11 rounded-base border border-neutral-200 px-[14px] text-[14px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
         </div>
 

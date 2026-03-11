@@ -5,8 +5,14 @@ import { useRouter } from 'next/navigation'
 import { Search, GripVertical } from 'lucide-react'
 import type { ClientRow } from '@/actions/clients'
 
-const FILTER_TABS = ['All', 'Sat Set', 'Sun Set', 'Custom'] as const
-type FilterTab = typeof FILTER_TABS[number]
+const FILTER_TABS = [
+  { label: 'All',     dbValue: '' },
+  { label: 'Sun Set', dbValue: 'sunday' },
+  { label: 'Sat Set', dbValue: 'saturday' },
+  { label: 'Custom',  dbValue: 'custom' },
+] as const
+type FilterTab = typeof FILTER_TABS[number]['label']
+
 
 function formatPrograms(programs: string[] | null | undefined): string {
   if (!programs || programs.length === 0) return ''
@@ -24,10 +30,11 @@ export function ClientsView({ clients, trainerInitials }: Props) {
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState<FilterTab>('All')
 
+  const activeDbValue = FILTER_TABS.find(t => t.label === activeFilter)?.dbValue ?? ''
+
   const filtered = clients.filter(c => {
     const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase())
-    const matchesFilter =
-      activeFilter === 'All' || c.schedule_set === activeFilter
+    const matchesFilter = activeDbValue === '' || c.schedule_set === activeDbValue
     return matchesSearch && matchesFilter
   })
 
@@ -64,16 +71,16 @@ export function ClientsView({ clients, trainerInitials }: Props) {
         <div className="flex gap-2">
           {FILTER_TABS.map(tab => (
             <button
-              key={tab}
-              onClick={() => setActiveFilter(tab)}
+              key={tab.label}
+              onClick={() => setActiveFilter(tab.label)}
               className={[
                 'flex items-center justify-center rounded-base px-4 py-2 text-[13px] font-normal transition-colors',
-                activeFilter === tab
+                activeFilter === tab.label
                   ? 'bg-neutral-800 text-white'
                   : 'bg-neutral-200 text-neutral-950',
               ].join(' ')}
             >
-              {tab}
+              {tab.label}
             </button>
           ))}
         </div>
