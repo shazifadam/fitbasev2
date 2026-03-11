@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base layer overrides ─────────────────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    @apply border-neutral-200;
+  }
+
+  html,
+  body {
+    @apply bg-neutral-100 text-neutral-950 font-sans font-normal antialiased;
+  }
+
+  /* Inter Medium (500) on headings ONLY */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium;
+  }
+
+  /* Everything else: Inter Regular (400) */
+  /* Explicit resets to prevent browser defaults from adding bold */
+  b, strong, th, label {
+    @apply font-normal;
+  }
+}
+
+/* ─── Utilities layer ──────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Hide scrollbar while keeping scroll functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Safe area padding for PWA bottom nav */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
