@@ -1,8 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronDown, GripVertical, CircleCheck, CircleX } from 'lucide-react'
 import type { AttendanceWithClient } from '@/actions/dashboard'
+import { SessionActionDrawer } from '@/components/dashboard/session-action-drawer'
+import { SelectWorkoutDrawer } from '@/components/dashboard/select-workout-drawer'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -46,6 +49,8 @@ type Props = {
 
 export function DashboardView({ date, attendance, trainerName }: Props) {
   const router = useRouter()
+  const [selectedItem, setSelectedItem] = useState<AttendanceWithClient | null>(null)
+  const [showWorkoutDrawer, setShowWorkoutDrawer] = useState(false)
 
   const attending = attendance.filter(a => a.status === 'attending')
   const scheduledAndAttending = attendance.filter(
@@ -117,9 +122,7 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
               <button
                 key={item.id}
                 className="flex items-center justify-between rounded-base bg-white border border-neutral-200 p-4 w-full text-left"
-                onClick={() => {
-                  // TODO Milestone 2: open SessionActionDrawer
-                }}
+                onClick={() => setSelectedItem(item)}
               >
                 <div className="flex flex-col gap-0.5">
                   <span className="text-base font-medium text-neutral-950">
@@ -196,6 +199,25 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
         )}
 
       </div>
+
+      {/* Session Action Drawer */}
+      <SessionActionDrawer
+        open={selectedItem !== null && !showWorkoutDrawer}
+        attendance={selectedItem}
+        onClose={() => setSelectedItem(null)}
+        onStartSession={() => setShowWorkoutDrawer(true)}
+      />
+
+      {/* Select Workout Drawer */}
+      <SelectWorkoutDrawer
+        open={showWorkoutDrawer}
+        attendance={selectedItem}
+        onClose={() => {
+          setShowWorkoutDrawer(false)
+          setSelectedItem(null)
+        }}
+      />
+
     </main>
   )
 }
