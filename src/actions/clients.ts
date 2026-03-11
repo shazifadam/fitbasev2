@@ -2,7 +2,6 @@
 
 import { createServerClientUntyped } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,21 +48,41 @@ export async function getClients(): Promise<ClientRow[]> {
 
 export async function getTiers(): Promise<TierRow[]> {
   const supabase = await createServerClientUntyped()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
 
-  const { data } = await supabase
+  const { data: trainer } = await supabase
+    .from('users').select('id').eq('auth_id', user.id).single()
+  if (!trainer) return []
+
+  const trainerId = (trainer as { id: string }).id
+
+  const { data: existing } = await supabase
     .from('tiers')
     .select('id, name')
+    .eq('trainer_id', trainerId)
     .order('name', { ascending: true })
 
-  return (data ?? []) as TierRow[]
+  if (existing && existing.length > 0) return existing as TierRow[]
+
+  // TODO: remove auto-seed once tier management page is built
+  const defaults = [
+    { name: 'Basic',    color: '#262626', amount: 0, max_concurrent_clients: 10, trainer_id: trainerId, is_default: true },
+    { name: 'Standard', color: '#262626', amount: 0, max_concurrent_clients: 20, trainer_id: trainerId, is_default: false },
+    { name: 'Premium',  color: '#262626', amount: 0, max_concurrent_clients: 30, trainer_id: trainerId, is_default: false },
+  ]
+  const { data: seeded } = await supabase.from('tiers').insert(defaults).select('id, name')
+  return (seeded ?? []) as TierRow[]
 }
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
-export async function createClient(input: CreateClientInput) {
+export async function createClient(
+  input: CreateClientInput
+): Promise<{ error?: string }> {
   const supabase = await createServerClientUntyped()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  if (!user) return { error: 'Not authenticated' }
 
   const { data: trainer } = await supabase
     .from('users')
@@ -71,7 +90,7 @@ export async function createClient(input: CreateClientInput) {
     .eq('auth_id', user.id)
     .single()
 
-  if (!trainer) throw new Error('Trainer not found')
+  if (!trainer) return { error: 'Trainer profile not found. Please sign out and sign in again.' }
 
   const { error } = await supabase
     .from('clients')
@@ -85,8 +104,8 @@ export async function createClient(input: CreateClientInput) {
       trainer_id: (trainer as { id: string }).id,
     })
 
-  if (error) throw error
+  if (error) return { error: error.message }
 
   revalidatePath('/clients')
-  redirect('/clients')
+  return {}
 }

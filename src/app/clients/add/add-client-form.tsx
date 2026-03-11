@@ -69,17 +69,18 @@ export function AddClientForm({ tiers }: Props) {
     setError(null)
 
     startTransition(async () => {
-      try {
-        await createClient({
-          name: name.trim(),
-          phone: phone.trim(),
-          training_programs: programs,
-          tier_id: tierId || null,
-          schedule_set: scheduleSet,
-          session_times: sessionTimes,
-        })
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to create client')
+      const result = await createClient({
+        name: name.trim(),
+        phone: phone.trim(),
+        training_programs: programs,
+        tier_id: tierId || null,
+        schedule_set: scheduleSet,
+        session_times: sessionTimes,
+      })
+      if (result.error) {
+        setError(result.error)
+      } else {
+        router.push('/clients')
       }
     })
   }
