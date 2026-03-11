@@ -65,12 +65,13 @@ export function BottomNav() {
 
 function FabButton() {
   return (
-    <button
+    <Link
+      href="/clients/add"
       className="flex h-14 w-14 items-center justify-center rounded-full bg-fab text-white shadow-fab hover:bg-fab-hover active:bg-fab-active -mt-6 transition-colors"
-      aria-label="Add"
+      aria-label="Add client"
     >
       <Plus size={24} />
-    </button>
+    </Link>
   )
 }
 
