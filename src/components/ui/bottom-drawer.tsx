@@ -2,66 +2,86 @@
 
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
+import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 // ─── Bottom Drawer (Bottom Sheet) ─────────────────────────────────────────
-// Used for: SessionActionDrawer, WorkoutSelectionDrawer
-// Design token rules:
-//   Outer shell → rounded-card (12px) on TOP corners only, flat bottom
-//   Overlay → rgba(0,0,0,0.4)
-//   Handle bar → w-10 (40px), h-1, bg-neutral-300, rounded-full, centered
-//   Action buttons inside → rounded-base (4px)
+// Animated with framer-motion: bezier ease-out slide-up from bottom
+// Overlay: fade in/out
 // ──────────────────────────────────────────────────────────────────────────
 
-const BottomDrawer = DialogPrimitive.Root
+// Context so BottomDrawerContent can read open state
+const DrawerOpenContext = React.createContext(false)
+
+function BottomDrawer({
+  open,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Root>) {
+  return (
+    <DrawerOpenContext.Provider value={!!open}>
+      <DialogPrimitive.Root open={open} {...props} />
+    </DrawerOpenContext.Provider>
+  )
+}
+
 const BottomDrawerTrigger = DialogPrimitive.Trigger
 const BottomDrawerClose = DialogPrimitive.Close
-const BottomDrawerPortal = DialogPrimitive.Portal
-
-const BottomDrawerOverlay = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
-  <DialogPrimitive.Overlay
-    ref={ref}
-    className={cn(
-      'fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-      className
-    )}
-    {...props}
-  />
-))
-BottomDrawerOverlay.displayName = 'BottomDrawerOverlay'
 
 const BottomDrawerContent = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
+  HTMLDivElement,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <BottomDrawerPortal>
-    <BottomDrawerOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      className={cn(
-        // Position at bottom, full width, max 428px centered
-        'fixed bottom-0 left-1/2 z-50 w-full max-w-[428px] -translate-x-1/2',
-        // Outer shell: rounded top corners only (12px), flat bottom
-        'rounded-t-card bg-white',
-        // Animations: slide up/down
-        'data-[state=open]:animate-in data-[state=closed]:animate-out',
-        'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
-        'duration-300',
-        className
-      )}
-      {...props}
-    >
-      {/* Handle bar */}
-      <div className="flex justify-center pt-3 pb-2">
-        <div className="h-1 w-10 rounded-full bg-neutral-300" />
-      </div>
-      {children}
-    </DialogPrimitive.Content>
-  </BottomDrawerPortal>
-))
+>(({ className, children, ...props }, ref) => {
+  const open = React.useContext(DrawerOpenContext)
+
+  return (
+    <DialogPrimitive.Portal forceMount>
+      <AnimatePresence>
+        {open && (
+          <>
+            {/* Overlay */}
+            <DialogPrimitive.Overlay asChild forceMount>
+              <motion.div
+                key="drawer-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className="fixed inset-0 z-50 bg-black/40"
+              />
+            </DialogPrimitive.Overlay>
+
+            {/* Sheet */}
+            <DialogPrimitive.Content asChild forceMount {...props}>
+              <motion.div
+                ref={ref}
+                key="drawer-content"
+                className={cn(
+                  'fixed bottom-0 left-1/2 z-50 w-full max-w-[428px] -translate-x-1/2',
+                  'rounded-t-card bg-white outline-none',
+                  className
+                )}
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{
+                  type: 'tween',
+                  ease: [0.32, 0.72, 0, 1],
+                  duration: 0.4,
+                }}
+              >
+                {/* Handle bar */}
+                <div className="flex justify-center pt-3 pb-2">
+                  <div className="h-1 w-10 rounded-full bg-neutral-300" />
+                </div>
+                {children}
+              </motion.div>
+            </DialogPrimitive.Content>
+          </>
+        )}
+      </AnimatePresence>
+    </DialogPrimitive.Portal>
+  )
+})
 BottomDrawerContent.displayName = 'BottomDrawerContent'
 
 const BottomDrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (

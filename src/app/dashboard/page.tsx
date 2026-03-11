@@ -12,17 +12,12 @@ function todayString(): string {
   return `${yyyy}-${mm}-${dd}`
 }
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ date?: string }>
-}) {
+export default async function DashboardPage() {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const params = await searchParams
-  const date = params.date ?? todayString()
+  const date = todayString()
 
   const [attendance, trainer] = await Promise.all([
     getAttendanceForDate(date),

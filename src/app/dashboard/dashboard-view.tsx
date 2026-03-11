@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { ArrowDown01Icon, DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from 'hugeicons-react'
+import { DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from 'hugeicons-react'
 import type { AttendanceWithClient } from '@/actions/dashboard'
 import { SessionActionDrawer } from '@/components/dashboard/session-action-drawer'
 import { SelectWorkoutDrawer } from '@/components/dashboard/select-workout-drawer'
@@ -48,19 +47,17 @@ type Props = {
 }
 
 export function DashboardView({ date, attendance, trainerName }: Props) {
-  const router = useRouter()
   const [selectedItem, setSelectedItem] = useState<AttendanceWithClient | null>(null)
   const [showWorkoutDrawer, setShowWorkoutDrawer] = useState(false)
 
   const attending = attendance.filter(a => a.status === 'attending')
-  const scheduledAndAttending = attendance.filter(
-    a => a.status === 'scheduled' || a.status === 'attending'
-  )
+  // Only show 'scheduled' in the time groups — 'attending' moves to /attending page
+  const scheduled = attendance.filter(a => a.status === 'scheduled')
   const attended = attendance.filter(a => a.status === 'attended')
   const absent = attendance.filter(a => a.status === 'missed')
 
-  // Group scheduled+attending by time
-  const byTime = scheduledAndAttending.reduce<Record<string, AttendanceWithClient[]>>(
+  // Group scheduled by time
+  const byTime = scheduled.reduce<Record<string, AttendanceWithClient[]>>(
     (acc, item) => {
       const time = formatTime(item.scheduled_time)
       if (!acc[time]) acc[time] = []
@@ -90,19 +87,12 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
           </div>
         </div>
 
-        {/* Date Selector */}
-        <label className="relative flex items-center justify-between h-12 px-4 bg-white rounded-base border border-neutral-200 cursor-pointer">
+        {/* Date Display — always today */}
+        <div className="flex items-center h-12 px-4 bg-white rounded-base border border-neutral-200">
           <span className="text-[15px] font-medium text-neutral-950">
             {formatDateLabel(date)}
           </span>
-          <ArrowDown01Icon size={20} color="currentColor" className="text-neutral-400 shrink-0" />
-          <input
-            type="date"
-            value={date}
-            onChange={e => router.push(`/dashboard?date=${e.target.value}`)}
-            className="absolute inset-0 opacity-0 cursor-pointer"
-          />
-        </label>
+        </div>
 
         {/* Summary Banner */}
         <div className="flex items-center justify-between rounded-base bg-neutral-800 px-4 py-4">
@@ -114,7 +104,7 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
           </div>
         </div>
 
-        {/* Time Groups */}
+        {/* Time Groups — scheduled only */}
         {timeGroups.map(([time, clients]) => (
           <div key={time} className="flex flex-col gap-2">
             <span className="text-[13px] font-medium text-neutral-500">{time}</span>
