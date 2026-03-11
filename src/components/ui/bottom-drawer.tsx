@@ -56,7 +56,7 @@ const BottomDrawerContent = React.forwardRef<
                 ref={ref}
                 key="drawer-content"
                 className={cn(
-                  'fixed bottom-0 left-1/2 z-50 w-full max-w-[428px] -translate-x-1/2',
+                  'fixed bottom-0 left-0 right-0 z-50 w-full max-w-[428px] mx-auto',
                   'rounded-t-card bg-white outline-none',
                   className
                 )}
