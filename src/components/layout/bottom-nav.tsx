@@ -65,33 +65,33 @@ export function BottomNav() {
               onClick={() => setFabOpen(false)}
             />
 
-            {/* Menu items */}
-            <div className="fixed bottom-20 left-1/2 z-50 -translate-x-1/2 w-full max-w-[428px] flex flex-col items-end gap-3 px-6 pb-4">
-              {fabMenuItems.map((item, i) => {
-                const Icon = item.icon
-                return (
-                  <motion.button
-                    key={item.href}
-                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{
-                      duration: 0.2,
-                      delay: (fabMenuItems.length - 1 - i) * 0.05,
-                    }}
-                    onClick={() => handleMenuItemClick(item.href)}
-                    className="flex items-center gap-3"
-                  >
-                    <span className="rounded-base bg-white px-4 py-2.5 text-[14px] font-normal text-neutral-950 shadow-lg border border-neutral-200">
-                      {item.label}
-                    </span>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg border border-neutral-200">
-                      <Icon size={20} color="currentColor" className="text-neutral-800" />
+            {/* Dropdown card */}
+            <motion.div
+              key="fab-dropdown"
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="fixed bottom-20 left-1/2 z-50 -translate-x-1/2 w-full max-w-[428px] px-6 pb-4"
+            >
+              <div className="rounded-base border border-neutral-200 bg-white shadow-lg overflow-hidden py-1">
+                {fabMenuItems.map((item, i) => {
+                  const Icon = item.icon
+                  return (
+                    <div key={item.href}>
+                      {i > 0 && <div className="mx-4 h-px bg-neutral-100" />}
+                      <button
+                        onClick={() => handleMenuItemClick(item.href)}
+                        className="flex w-full items-center gap-2.5 px-4 py-3 text-left"
+                      >
+                        <Icon size={18} color="currentColor" className="text-neutral-500" />
+                        <span className="text-[14px] font-normal text-neutral-950">{item.label}</span>
+                      </button>
                     </div>
-                  </motion.button>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+            </motion.div>
           </>
         )}
       </AnimatePresence>

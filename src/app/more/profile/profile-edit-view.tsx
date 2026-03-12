@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft01Icon, Cancel01Icon } from 'hugeicons-react'
+import { ArrowLeft01Icon } from 'hugeicons-react'
 import { updateTrainerProfile } from '@/actions/profile'
 import type { TrainerProfileDetail } from '@/actions/profile'
 

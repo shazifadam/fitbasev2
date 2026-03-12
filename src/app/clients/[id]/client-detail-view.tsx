@@ -8,6 +8,8 @@ import {
   ArrowDown01Icon,
   ArrowRight01Icon,
   Money01Icon,
+  ChartLineData01Icon,
+  Clock01Icon,
   UserRemove01Icon,
   Delete01Icon,
 } from 'hugeicons-react'
@@ -57,10 +59,12 @@ function formatPaymentDate(dateStr: string | null): string {
 
 function ClientMenu({
   onRecordPayment,
+  onRecordProgress,
   onDeactivate,
   onDelete,
 }: {
   onRecordPayment: () => void
+  onRecordProgress: () => void
   onDeactivate: () => void
   onDelete: () => void
 }) {
@@ -91,6 +95,13 @@ function ClientMenu({
           >
             <Money01Icon size={18} color="currentColor" className="text-neutral-500" />
             Record Payment
+          </button>
+          <button
+            onClick={() => { setOpen(false); onRecordProgress() }}
+            className="flex w-full items-center gap-3 px-4 py-2.5 text-[14px] font-normal text-neutral-950 text-left"
+          >
+            <ChartLineData01Icon size={18} color="currentColor" className="text-neutral-500" />
+            Record Progress
           </button>
           <button
             onClick={() => { setOpen(false); onDeactivate() }}
@@ -166,6 +177,81 @@ function AttendanceDotGrid({ attendance, clientId }: { attendance: AttendanceHis
   )
 }
 
+// ─── Payment Card ───────────────────────────────────────────────────────────
+
+function PaymentCard({ payment, clientId }: { payment: PaymentStatus; clientId: string }) {
+  const router = useRouter()
+
+  // No payment records at all
+  if (!payment.lastPaymentDate) {
+    return (
+      <button
+        onClick={() => router.push(`/clients/${clientId}/payments`)}
+        className="flex items-center justify-between rounded-base bg-white border border-neutral-200 p-4 w-full text-left"
+      >
+        <span className="text-[13px] font-normal text-neutral-400">No payment records</span>
+        <ArrowRight01Icon size={16} color="currentColor" className="text-neutral-400" />
+      </button>
+    )
+  }
+
+  const isOverdue = payment.isOverdue
+
+  return (
+    <button
+      onClick={() => router.push(`/clients/${clientId}/payments`)}
+      className="flex rounded-base bg-white border border-neutral-200 overflow-hidden w-full text-left"
+    >
+      {/* Orange accent bar for overdue */}
+      {isOverdue && (
+        <div className="w-1 shrink-0 bg-amber-600 rounded-l-base" />
+      )}
+      {/* Green accent bar for paid */}
+      {!isOverdue && (
+        <div className="w-1 shrink-0 bg-success-600 rounded-l-base" />
+      )}
+
+      <div className="flex flex-col gap-3 p-4 flex-1">
+        {/* Row 1: label + amount */}
+        <div className="flex items-center justify-between">
+          <span className="text-[12px] font-normal text-neutral-400">Payment Status</span>
+          <span className="text-[18px] font-medium text-neutral-950">
+            {payment.currency} {payment.amount?.toFixed(2)}
+          </span>
+        </div>
+
+        {/* Row 2: status text + pill */}
+        <div className="flex items-center justify-between">
+          <span className="text-[14px] font-normal text-neutral-500">
+            {isOverdue
+              ? `Overdue — ${formatPaymentDate(payment.validUntil)}`
+              : `Paid — Valid until ${formatPaymentDate(payment.validUntil)}`
+            }
+          </span>
+          {isOverdue ? (
+            <span className="rounded-full bg-orange-50 border border-orange-200 px-2.5 py-1 text-[12px] font-normal text-amber-700">
+              Unpaid
+            </span>
+          ) : (
+            <span className="rounded-full bg-green-50 border border-green-200 px-2.5 py-1 text-[12px] font-normal text-green-700">
+              Paid
+            </span>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div className="h-px bg-neutral-200" />
+
+        {/* View Payment History link */}
+        <div className="flex items-center justify-center gap-1.5">
+          <Clock01Icon size={14} color="currentColor" className="text-neutral-400" />
+          <span className="text-[13px] font-normal text-neutral-400">View Payment History</span>
+        </div>
+      </div>
+    </button>
+  )
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 type Props = {
@@ -220,6 +306,7 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
           </h1>
           <ClientMenu
             onRecordPayment={() => setShowPaymentDrawer(true)}
+            onRecordProgress={() => router.push(`/progress/record/${client.id}`)}
             onDeactivate={handleDeactivate}
             onDelete={handleDelete}
           />
@@ -240,49 +327,16 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
           </span>
         </div>
 
-        {/* Payment Status Card — clickable to payment history */}
-        <button
-          onClick={() => router.push(`/clients/${client.id}/payments`)}
-          className="w-full text-left"
-        >
-          {payment.lastPaymentDate ? (
-            <div className={`flex items-center justify-between rounded-base p-4 ${
-              payment.isOverdue ? 'bg-amber-50' : 'bg-green-50'
-            }`}>
-              <div className="flex flex-col gap-1">
-                <span className={`text-[12px] font-medium ${
-                  payment.isOverdue ? 'text-amber-700' : 'text-green-700'
-                }`}>
-                  Payment Status
-                </span>
-                <span className="text-[14px] font-medium text-neutral-950">
-                  {payment.isOverdue
-                    ? `Overdue — ${formatPaymentDate(payment.validUntil)}`
-                    : `Paid — Valid until ${formatPaymentDate(payment.validUntil)}`
-                  }
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-base font-medium ${
-                  payment.isOverdue ? 'text-amber-700' : 'text-green-700'
-                }`}>
-                  {payment.currency} {payment.amount?.toFixed(2)}
-                </span>
-                <ArrowRight01Icon size={16} color="currentColor" className={payment.isOverdue ? 'text-amber-700' : 'text-green-700'} />
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between rounded-base bg-neutral-200/50 p-4">
-              <span className="text-[13px] font-normal text-neutral-400">No payment records</span>
-              <ArrowRight01Icon size={16} color="currentColor" className="text-neutral-400" />
-            </div>
-          )}
-        </button>
+        {/* Payment Status Card — shown at TOP if overdue */}
+        {payment.isOverdue && <PaymentCard payment={payment} clientId={client.id} />}
 
         {/* Progress Stats */}
         {(client.current_height || client.current_weight || client.current_fat_percent) && (
           <div className="flex flex-col gap-3">
-            <span className="text-xl font-medium text-neutral-950">Progress Stats</span>
+            <div className="flex items-center justify-between">
+              <span className="text-xl font-medium text-neutral-950">Progress Stats</span>
+              <button onClick={() => router.push(`/clients/${client.id}/progress`)} className="text-[13px] font-medium text-neutral-950">View Full</button>
+            </div>
             <div className="flex gap-2">
               {client.current_height != null && (
                 <div className="flex flex-1 flex-col gap-1 rounded-base bg-white border border-neutral-200 p-4">
@@ -325,6 +379,9 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
         {attendance.length > 0 && (
           <AttendanceDotGrid attendance={attendance} clientId={client.id} />
         )}
+
+        {/* Payment Status Card — shown LOWER if not overdue */}
+        {!payment.isOverdue && <PaymentCard payment={payment} clientId={client.id} />}
 
         {/* Workout Routine */}
         {workouts.length > 0 && (
