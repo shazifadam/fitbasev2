@@ -336,3 +336,33 @@ export async function createClient(
   revalidatePath('/dashboard')
   return {}
 }
+
+export async function deactivateClient(clientId: string): Promise<{ error?: string }> {
+  const supabase = await createServerClientUntyped()
+
+  const { error } = await supabase
+    .from('clients')
+    .update({ is_archived: true, archived_at: new Date().toISOString() })
+    .eq('id', clientId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/clients')
+  revalidatePath('/dashboard')
+  return {}
+}
+
+export async function deleteClient(clientId: string): Promise<{ error?: string }> {
+  const supabase = await createServerClientUntyped()
+
+  const { error } = await supabase
+    .from('clients')
+    .delete()
+    .eq('id', clientId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/clients')
+  revalidatePath('/dashboard')
+  return {}
+}

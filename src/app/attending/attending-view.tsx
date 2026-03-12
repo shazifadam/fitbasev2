@@ -19,13 +19,6 @@ function getInitials(name: string): string {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 }
 
-function formatStartedTime(iso: string | null): string {
-  if (!iso) return ''
-  return new Date(iso).toLocaleTimeString('en-US', {
-    hour: '2-digit', minute: '2-digit', hour12: false,
-  })
-}
-
 function initWeights(session: AttendingSession): ExerciseWeights {
   if (session.exercise_weights?.exercises?.length) {
     return session.exercise_weights

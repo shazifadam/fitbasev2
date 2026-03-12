@@ -1,12 +1,18 @@
 'use client'
 
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft01Icon,
   MoreVerticalIcon,
   ArrowDown01Icon,
   ArrowRight01Icon,
+  Money01Icon,
+  UserRemove01Icon,
+  Delete01Icon,
 } from 'hugeicons-react'
+import { RecordPaymentDrawer } from '@/components/payments/record-payment-drawer'
+import { deactivateClient, deleteClient } from '@/actions/clients'
 import type {
   ClientDetail,
   AttendanceHistoryRow,
@@ -45,6 +51,65 @@ function formatPaymentDate(dateStr: string | null): string {
   const [y, m, d] = dateStr.split('-').map(Number)
   const date = new Date(y, m - 1, d)
   return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+}
+
+// ─── Dropdown Menu ──────────────────────────────────────────────────────────
+
+function ClientMenu({
+  onRecordPayment,
+  onDeactivate,
+  onDelete,
+}: {
+  onRecordPayment: () => void
+  onDeactivate: () => void
+  onDelete: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button onClick={() => setOpen(prev => !prev)} className="p-1">
+        <MoreVerticalIcon size={22} color="currentColor" className="text-neutral-500" />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 z-10 rounded-base border border-neutral-200 bg-white shadow-lg py-2 min-w-[200px]">
+          <button
+            onClick={() => { setOpen(false); onRecordPayment() }}
+            className="flex w-full items-center gap-3 px-4 py-2.5 text-[14px] font-normal text-neutral-950 text-left"
+          >
+            <Money01Icon size={18} color="currentColor" className="text-neutral-500" />
+            Record Payment
+          </button>
+          <button
+            onClick={() => { setOpen(false); onDeactivate() }}
+            className="flex w-full items-center gap-3 px-4 py-2.5 text-[14px] font-normal text-neutral-950 text-left"
+          >
+            <UserRemove01Icon size={18} color="currentColor" className="text-neutral-500" />
+            Deactivate Client
+          </button>
+          <button
+            onClick={() => { setOpen(false); onDelete() }}
+            className="flex w-full items-center gap-3 px-4 py-2.5 text-[14px] font-normal text-danger-600 text-left"
+          >
+            <Delete01Icon size={18} color="currentColor" className="text-danger-600" />
+            Delete Client
+          </button>
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ─── Attendance Dot Grid ─────────────────────────────────────────────────────
@@ -108,10 +173,32 @@ type Props = {
   attendance: AttendanceHistoryRow[]
   payment: PaymentStatus
   workouts: ClientWorkout[]
+  tierAmount: number | null
 }
 
-export function ClientDetailView({ client, attendance, payment, workouts }: Props) {
+export function ClientDetailView({ client, attendance, payment, workouts, tierAmount }: Props) {
   const router = useRouter()
+  const [showPaymentDrawer, setShowPaymentDrawer] = useState(false)
+
+  function handleDeactivate() {
+    if (!confirm('Deactivate this client? They will be hidden from the dashboard.')) return
+    void (async () => {
+      const result = await deactivateClient(client.id)
+      if (!result.error) {
+        router.push('/clients')
+      }
+    })()
+  }
+
+  function handleDelete() {
+    if (!confirm('Permanently delete this client and all their data? This cannot be undone.')) return
+    void (async () => {
+      const result = await deleteClient(client.id)
+      if (!result.error) {
+        router.push('/clients')
+      }
+    })()
+  }
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">
@@ -131,7 +218,11 @@ export function ClientDetailView({ client, attendance, payment, workouts }: Prop
           <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px]">
             {client.name}
           </h1>
-          <MoreVerticalIcon size={22} color="currentColor" className="text-neutral-500" />
+          <ClientMenu
+            onRecordPayment={() => setShowPaymentDrawer(true)}
+            onDeactivate={handleDeactivate}
+            onDelete={handleDelete}
+          />
         </div>
 
         {/* Programs */}
@@ -149,35 +240,44 @@ export function ClientDetailView({ client, attendance, payment, workouts }: Prop
           </span>
         </div>
 
-        {/* Payment Status Card */}
-        {payment.lastPaymentDate ? (
-          <div className={`flex items-center justify-between rounded-base p-4 ${
-            payment.isOverdue ? 'bg-amber-50' : 'bg-green-50'
-          }`}>
-            <div className="flex flex-col gap-1">
-              <span className={`text-[12px] font-medium ${
-                payment.isOverdue ? 'text-amber-700' : 'text-green-700'
-              }`}>
-                Payment Status
-              </span>
-              <span className="text-[14px] font-medium text-neutral-950">
-                {payment.isOverdue
-                  ? `Overdue — ${formatPaymentDate(payment.validUntil)}`
-                  : `Paid — Valid until ${formatPaymentDate(payment.validUntil)}`
-                }
-              </span>
-            </div>
-            <span className={`text-base font-medium ${
-              payment.isOverdue ? 'text-amber-700' : 'text-green-700'
+        {/* Payment Status Card — clickable to payment history */}
+        <button
+          onClick={() => router.push(`/clients/${client.id}/payments`)}
+          className="w-full text-left"
+        >
+          {payment.lastPaymentDate ? (
+            <div className={`flex items-center justify-between rounded-base p-4 ${
+              payment.isOverdue ? 'bg-amber-50' : 'bg-green-50'
             }`}>
-              {payment.currency} {payment.amount?.toFixed(2)}
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between rounded-base bg-neutral-200/50 p-4">
-            <span className="text-[13px] font-normal text-neutral-400">No payment records</span>
-          </div>
-        )}
+              <div className="flex flex-col gap-1">
+                <span className={`text-[12px] font-medium ${
+                  payment.isOverdue ? 'text-amber-700' : 'text-green-700'
+                }`}>
+                  Payment Status
+                </span>
+                <span className="text-[14px] font-medium text-neutral-950">
+                  {payment.isOverdue
+                    ? `Overdue — ${formatPaymentDate(payment.validUntil)}`
+                    : `Paid — Valid until ${formatPaymentDate(payment.validUntil)}`
+                  }
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-base font-medium ${
+                  payment.isOverdue ? 'text-amber-700' : 'text-green-700'
+                }`}>
+                  {payment.currency} {payment.amount?.toFixed(2)}
+                </span>
+                <ArrowRight01Icon size={16} color="currentColor" className={payment.isOverdue ? 'text-amber-700' : 'text-green-700'} />
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between rounded-base bg-neutral-200/50 p-4">
+              <span className="text-[13px] font-normal text-neutral-400">No payment records</span>
+              <ArrowRight01Icon size={16} color="currentColor" className="text-neutral-400" />
+            </div>
+          )}
+        </button>
 
         {/* Progress Stats */}
         {(client.current_height || client.current_weight || client.current_fat_percent) && (
@@ -262,6 +362,15 @@ export function ClientDetailView({ client, attendance, payment, workouts }: Prop
         )}
 
       </div>
+
+      {/* Record Payment Drawer */}
+      <RecordPaymentDrawer
+        open={showPaymentDrawer}
+        onClose={() => setShowPaymentDrawer(false)}
+        clientId={client.id}
+        tierAmount={tierAmount}
+        currency={payment.currency}
+      />
     </main>
   )
 }
