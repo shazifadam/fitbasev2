@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft01Icon } from 'hugeicons-react'
+import { Spinner } from '@/components/ui/spinner'
 import { updateTrainerProfile } from '@/actions/profile'
 import type { TrainerProfileDetail } from '@/actions/profile'
 
@@ -102,9 +103,9 @@ export function ProfileEditView({ profile }: Props) {
         <button
           onClick={handleSave}
           disabled={isPending}
-          className="flex h-[52px] w-full items-center justify-center rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
+          className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
         >
-          {isPending ? 'Saving...' : 'Save Changes'}
+          {isPending ? <><Spinner className="text-white" /> Saving…</> : 'Save Changes'}
         </button>
 
       </div>

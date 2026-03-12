@@ -8,6 +8,7 @@ import {
   BottomDrawerContent,
 } from '@/components/ui/bottom-drawer'
 import { recordPayment } from '@/actions/payments'
+import { Spinner } from '@/components/ui/spinner'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -177,9 +178,9 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
           <button
             onClick={handleSubmit}
             disabled={isPending || !tierAmount}
-            className="flex h-[52px] w-full items-center justify-center rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
+            className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
           >
-            {isPending ? 'Recording…' : 'Record Payment'}
+            {isPending ? <><Spinner className="text-white" /> Recording…</> : 'Record Payment'}
           </button>
 
           <button

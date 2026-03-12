@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Calendar01Icon, DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from 'hugeicons-react'
 import { undoAttendance } from '@/actions/session'
+import { Spinner } from '@/components/ui/spinner'
 import type { AttendanceWithClient } from '@/actions/dashboard'
 
 const SessionActionDrawer = dynamic(
@@ -99,9 +100,9 @@ function AttendedCard({ item }: { item: AttendanceWithClient }) {
             <button
               onClick={handleUndo}
               disabled={isPending}
-              className="flex items-center whitespace-nowrap px-4 py-2.5 text-[14px] font-normal text-danger-600 disabled:opacity-50"
+              className="flex items-center gap-2 whitespace-nowrap px-4 py-3.5 text-[14px] font-normal text-danger-600 disabled:opacity-50"
             >
-              {isPending ? 'Undoing…' : 'Undo Attendance'}
+              {isPending ? <><Spinner className="text-danger-600" /> Undoing…</> : 'Undo Attendance'}
             </button>
           </div>
         )}

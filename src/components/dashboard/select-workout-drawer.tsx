@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/bottom-drawer'
 import { getTrainerWorkouts, type WorkoutSummary } from '@/actions/workouts'
 import { startSession } from '@/actions/session'
+import { Spinner } from '@/components/ui/spinner'
 import type { AttendanceWithClient } from '@/actions/dashboard'
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -113,7 +114,7 @@ export function SelectWorkoutDrawer({ open, attendance, onClose }: Props) {
             disabled={isPending}
             className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
           >
-            <PlayIcon size={16} color="white" />
+            {isPending ? <Spinner className="text-white" /> : <PlayIcon size={16} color="white" />}
             {isPending ? 'Starting…' : 'Start Session'}
           </button>
 

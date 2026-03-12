@@ -17,6 +17,7 @@ import { createExercise } from '@/actions/exercises'
 import { createWorkout } from '@/actions/workouts'
 import type { ExerciseRow } from '@/actions/exercises'
 import type { WorkoutSetRow } from '@/actions/workouts'
+import { Spinner } from '@/components/ui/spinner'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -156,9 +157,9 @@ function SearchExercisesSheet({
               <button
                 onClick={handleCreateExercise}
                 disabled={isPending || !newName.trim()}
-                className="h-10 rounded-base bg-neutral-800 text-[14px] font-normal text-white disabled:opacity-50"
+                className="flex items-center justify-center gap-1.5 h-10 px-3 rounded-base bg-neutral-800 text-[14px] font-normal text-white disabled:opacity-50"
               >
-                {isPending ? 'Creating…' : 'Create & Add'}
+                {isPending ? <><Spinner size={14} className="text-white" /> Creating…</> : 'Create & Add'}
               </button>
             </div>
           )}
@@ -402,9 +403,9 @@ export function CreateWorkoutView({ exercises }: Props) {
           <button
             onClick={handleSave}
             disabled={isPending || !name.trim()}
-            className="flex h-[52px] w-full items-center justify-center rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
+            className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
           >
-            {isPending ? 'Saving…' : 'Save Workout'}
+            {isPending ? <><Spinner className="text-white" /> Saving…</> : 'Save Workout'}
           </button>
         )}
       </div>

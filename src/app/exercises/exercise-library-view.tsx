@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/bottom-drawer'
 import { createExercise, deleteExercise } from '@/actions/exercises'
 import type { ExerciseRow } from '@/actions/exercises'
+import { Spinner } from '@/components/ui/spinner'
 
 // ─── Body Part Filters ───────────────────────────────────────────────────────
 
@@ -143,9 +144,9 @@ function AddExerciseDrawer({
           <button
             onClick={handleSubmit}
             disabled={isPending || !name.trim()}
-            className="flex h-[52px] w-full items-center justify-center rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
+            className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
           >
-            {isPending ? 'Adding…' : 'Add Exercise'}
+            {isPending ? <><Spinner className="text-white" /> Adding…</> : 'Add Exercise'}
           </button>
 
           <button

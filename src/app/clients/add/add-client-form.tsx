@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowDown01Icon, ArrowLeft01Icon } from 'hugeicons-react'
+import { Spinner } from '@/components/ui/spinner'
 import { createClient, type TierRow } from '@/actions/clients'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -262,9 +263,9 @@ export function AddClientForm({ tiers }: Props) {
         <button
           onClick={handleSubmit}
           disabled={isPending}
-          className="flex h-12 w-full items-center justify-center rounded-base bg-neutral-800 text-[15px] font-normal text-white disabled:opacity-50"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-[15px] font-normal text-white disabled:opacity-50"
         >
-          {isPending ? 'Adding…' : 'Add Client'}
+          {isPending ? <><Spinner className="text-white" /> Adding…</> : 'Add Client'}
         </button>
 
       </div>

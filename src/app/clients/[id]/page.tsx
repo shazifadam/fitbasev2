@@ -7,6 +7,7 @@ import {
   getClientPaymentStatus,
   getClientWorkouts,
 } from '@/actions/clients'
+import { getProgressTrend } from '@/actions/progress'
 import { ClientDetailView } from './client-detail-view'
 import { BottomNav } from '@/components/layout/bottom-nav'
 
@@ -21,11 +22,12 @@ export default async function ClientDetailPage({
 
   const { id } = await params
 
-  const [client, attendance, payment, workouts] = await Promise.all([
+  const [client, attendance, payment, workouts, progressTrend] = await Promise.all([
     getClientDetail(id),
     getClientAttendance(id),
     getClientPaymentStatus(id),
     getClientWorkouts(id),
+    getProgressTrend(id),
   ])
 
   if (!client) notFound()
@@ -46,6 +48,7 @@ export default async function ClientDetailPage({
         payment={payment}
         workouts={workouts}
         tierAmount={tierAmount}
+        progressTrend={progressTrend}
       />
       <BottomNav />
     </>

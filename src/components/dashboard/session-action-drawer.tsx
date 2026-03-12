@@ -7,6 +7,7 @@ import {
   BottomDrawerContent,
 } from '@/components/ui/bottom-drawer'
 import { markAbsent, rescheduleSession } from '@/actions/session'
+import { Spinner } from '@/components/ui/spinner'
 import type { AttendanceWithClient } from '@/actions/dashboard'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -147,9 +148,9 @@ export function SessionActionDrawer({ open, attendance, onClose, onStartSession 
               <button
                 onClick={handleRescheduleConfirm}
                 disabled={isPending || !newDate}
-                className="flex h-[52px] w-full items-center justify-center rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
+                className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
               >
-                {action === 'reschedule' ? 'Rescheduling…' : 'Confirm Reschedule'}
+                {action === 'reschedule' ? <><Spinner className="text-white" /> Rescheduling…</> : 'Confirm Reschedule'}
               </button>
 
               <button
@@ -166,7 +167,7 @@ export function SessionActionDrawer({ open, attendance, onClose, onStartSession 
               <button
                 onClick={onStartSession}
                 disabled={isPending}
-                className="flex h-[52px] w-full items-center justify-center rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
+                className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
               >
                 Start Session
               </button>
@@ -175,9 +176,9 @@ export function SessionActionDrawer({ open, attendance, onClose, onStartSession 
               <button
                 onClick={handleMarkAbsent}
                 disabled={isPending}
-                className="flex h-[52px] w-full items-center justify-center rounded-base border-[1.5px] border-danger-600 text-base font-normal text-danger-600 disabled:opacity-50"
+                className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base border-[1.5px] border-danger-600 text-base font-normal text-danger-600 disabled:opacity-50"
               >
-                {action === 'absent' ? 'Marking…' : 'Mark as Absent'}
+                {action === 'absent' ? <><Spinner className="text-danger-600" /> Marking…</> : 'Mark as Absent'}
               </button>
 
               {/* Reschedule */}

@@ -82,7 +82,7 @@ export function BottomNav() {
                       {i > 0 && <div className="mx-4 h-px bg-neutral-100" />}
                       <button
                         onClick={() => handleMenuItemClick(item.href)}
-                        className="flex w-full items-center gap-2.5 px-4 py-3 text-left"
+                        className="flex w-full items-center gap-2.5 px-4 py-3.5 text-left"
                       >
                         <Icon size={18} color="currentColor" className="text-neutral-500" />
                         <span className="text-[14px] font-normal text-neutral-950">{item.label}</span>

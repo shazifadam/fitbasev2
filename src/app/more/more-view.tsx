@@ -13,6 +13,7 @@ import {
   Logout01Icon,
 } from 'hugeicons-react'
 import { signOut } from '@/actions/profile'
+import { Spinner } from '@/components/ui/spinner'
 import type { TrainerProfileDetail } from '@/actions/profile'
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -131,7 +132,7 @@ export function MoreView({ profile }: Props) {
           disabled={isPending}
           className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-danger-50 text-base font-normal text-danger-600 disabled:opacity-50"
         >
-          <Logout01Icon size={18} color="currentColor" />
+          {isPending ? <Spinner className="text-danger-600" /> : <Logout01Icon size={18} color="currentColor" />}
           {isPending ? 'Logging out…' : 'Log Out'}
         </button>
 

@@ -82,6 +82,44 @@ export async function getPreviousMeasurement(clientId: string): Promise<Previous
   return data as PreviousMeasurement
 }
 
+export type ProgressTrend = {
+  weight: 'up' | 'down' | 'same' | null
+  height: 'up' | 'down' | 'same' | null
+  fat_percent: 'up' | 'down' | 'same' | null
+}
+
+export async function getProgressTrend(clientId: string): Promise<ProgressTrend> {
+  const supabase = await createServerClientUntyped()
+
+  const { data } = await supabase
+    .from('progress')
+    .select('weight, height, fat_percent')
+    .eq('client_id', clientId)
+    .order('recorded_at', { ascending: false })
+    .limit(2)
+
+  const entries = (data ?? []) as { weight: number | null; height: number | null; fat_percent: number | null }[]
+
+  if (entries.length < 2) {
+    return { weight: null, height: null, fat_percent: null }
+  }
+
+  const [current, previous] = entries
+
+  function compare(curr: number | null, prev: number | null): 'up' | 'down' | 'same' | null {
+    if (curr == null || prev == null) return null
+    if (curr > prev) return 'up'
+    if (curr < prev) return 'down'
+    return 'same'
+  }
+
+  return {
+    weight: compare(current.weight, previous.weight),
+    height: compare(current.height, previous.height),
+    fat_percent: compare(current.fat_percent, previous.fat_percent),
+  }
+}
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 export async function recordProgress(input: RecordProgressInput): Promise<{ error?: string }> {

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft01Icon } from 'hugeicons-react'
+import { Spinner } from '@/components/ui/spinner'
 import { recordProgress } from '@/actions/progress'
 import type { PreviousMeasurement } from '@/actions/progress'
 
@@ -212,9 +213,9 @@ export function RecordProgressForm({ client, previous }: Props) {
         <button
           onClick={handleSubmit}
           disabled={isPending}
-          className="flex h-[52px] w-full items-center justify-center rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
+          className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
         >
-          {isPending ? 'Saving...' : 'Save Progress'}
+          {isPending ? <><Spinner className="text-white" /> Saving…</> : 'Save Progress'}
         </button>
       </div>
     </main>

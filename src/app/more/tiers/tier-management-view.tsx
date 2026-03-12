@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/bottom-drawer'
 import { createTier, updateTier, deleteTier } from '@/actions/tiers'
 import type { TierDetail } from '@/actions/tiers'
+import { Spinner } from '@/components/ui/spinner'
 
 // ─── Tier Drawer ──────────────────────────────────────────────────────────────
 
@@ -106,10 +107,10 @@ function TierDrawer({
           <button
             onClick={handleSubmit}
             disabled={isPending}
-            className="flex h-[52px] w-full items-center justify-center rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
+            className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
           >
             {isPending
-              ? (isEdit ? 'Saving…' : 'Creating…')
+              ? <><Spinner className="text-white" /> {isEdit ? 'Saving…' : 'Creating…'}</>
               : (isEdit ? 'Save Changes' : 'Create Tier')
             }
           </button>

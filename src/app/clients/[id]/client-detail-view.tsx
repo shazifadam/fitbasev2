@@ -4,9 +4,11 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft01Icon,
+  ArrowUp01Icon,
   MoreVerticalIcon,
   ArrowDown01Icon,
   ArrowRight01Icon,
+  MinusSignIcon,
   Money01Icon,
   ChartLineData01Icon,
   PencilEdit01Icon,
@@ -14,6 +16,7 @@ import {
   UserRemove01Icon,
   Delete01Icon,
 } from 'hugeicons-react'
+import type { ProgressTrend } from '@/actions/progress'
 import { RecordPaymentDrawer } from '@/components/payments/record-payment-drawer'
 import { deactivateClient, deleteClient } from '@/actions/clients'
 import type {
@@ -94,35 +97,35 @@ function ClientMenu({
         <div className="absolute right-0 top-full mt-1 z-10 rounded-base border border-neutral-200 bg-white shadow-lg py-2 min-w-[200px]">
           <button
             onClick={() => { setOpen(false); onEditClient() }}
-            className="flex w-full items-center gap-3 px-4 py-2.5 text-[14px] font-normal text-neutral-950 text-left"
+            className="flex w-full items-center gap-3 px-4 py-3.5 text-[14px] font-normal text-neutral-950 text-left"
           >
             <PencilEdit01Icon size={18} color="currentColor" className="text-neutral-500" />
             Edit Client
           </button>
           <button
             onClick={() => { setOpen(false); onRecordPayment() }}
-            className="flex w-full items-center gap-3 px-4 py-2.5 text-[14px] font-normal text-neutral-950 text-left"
+            className="flex w-full items-center gap-3 px-4 py-3.5 text-[14px] font-normal text-neutral-950 text-left"
           >
             <Money01Icon size={18} color="currentColor" className="text-neutral-500" />
             Record Payment
           </button>
           <button
             onClick={() => { setOpen(false); onRecordProgress() }}
-            className="flex w-full items-center gap-3 px-4 py-2.5 text-[14px] font-normal text-neutral-950 text-left"
+            className="flex w-full items-center gap-3 px-4 py-3.5 text-[14px] font-normal text-neutral-950 text-left"
           >
             <ChartLineData01Icon size={18} color="currentColor" className="text-neutral-500" />
             Record Progress
           </button>
           <button
             onClick={() => { setOpen(false); onDeactivate() }}
-            className="flex w-full items-center gap-3 px-4 py-2.5 text-[14px] font-normal text-neutral-950 text-left"
+            className="flex w-full items-center gap-3 px-4 py-3.5 text-[14px] font-normal text-neutral-950 text-left"
           >
             <UserRemove01Icon size={18} color="currentColor" className="text-neutral-500" />
             Deactivate Client
           </button>
           <button
             onClick={() => { setOpen(false); onDelete() }}
-            className="flex w-full items-center gap-3 px-4 py-2.5 text-[14px] font-normal text-danger-600 text-left"
+            className="flex w-full items-center gap-3 px-4 py-3.5 text-[14px] font-normal text-danger-600 text-left"
           >
             <Delete01Icon size={18} color="currentColor" className="text-danger-600" />
             Delete Client
@@ -264,15 +267,33 @@ function PaymentCard({ payment, clientId }: { payment: PaymentStatus; clientId: 
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+// ─── Trend Icon Helper ──────────────────────────────────────────────────────
+
+function TrendIcon({ direction, invertColor }: { direction: 'up' | 'down' | 'same' | null; invertColor?: boolean }) {
+  if (!direction || direction === 'same') {
+    return <MinusSignIcon size={16} color="currentColor" className="text-neutral-400" />
+  }
+  // For weight/body fat: down = good (green), up = bad (red)
+  // For height: up = good (green), down = neutral
+  const isGood = invertColor ? direction === 'up' : direction === 'down'
+  const colorClass = isGood ? 'text-success-600' : 'text-danger-600'
+
+  if (direction === 'up') {
+    return <ArrowUp01Icon size={16} color="currentColor" className={colorClass} />
+  }
+  return <ArrowDown01Icon size={16} color="currentColor" className={colorClass} />
+}
+
 type Props = {
   client: ClientDetail
   attendance: AttendanceHistoryRow[]
   payment: PaymentStatus
   workouts: ClientWorkout[]
   tierAmount: number | null
+  progressTrend: ProgressTrend
 }
 
-export function ClientDetailView({ client, attendance, payment, workouts, tierAmount }: Props) {
+export function ClientDetailView({ client, attendance, payment, workouts, tierAmount, progressTrend }: Props) {
   const router = useRouter()
   const [showPaymentDrawer, setShowPaymentDrawer] = useState(false)
 
@@ -351,9 +372,12 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
             <div className="flex gap-2">
               {client.current_height != null && (
                 <div className="flex flex-1 flex-col gap-1 rounded-base bg-white border border-neutral-200 p-4">
-                  <span className="text-[28px] font-medium text-neutral-950 leading-none">
-                    {client.current_height}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[28px] font-medium text-neutral-950 leading-none">
+                      {client.current_height}
+                    </span>
+                    <TrendIcon direction={progressTrend.height} invertColor />
+                  </div>
                   <span className="text-[12px] font-normal text-neutral-500">cm</span>
                   <span className="text-[12px] font-medium text-neutral-500">Height</span>
                 </div>
@@ -364,7 +388,7 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
                     <span className="text-[28px] font-medium text-neutral-950 leading-none">
                       {client.current_weight}
                     </span>
-                    <ArrowDown01Icon size={16} color="currentColor" className="text-success-600" />
+                    <TrendIcon direction={progressTrend.weight} />
                   </div>
                   <span className="text-[12px] font-normal text-neutral-500">kg</span>
                   <span className="text-[12px] font-medium text-neutral-500">Weight</span>
@@ -376,7 +400,7 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
                     <span className="text-[28px] font-medium text-neutral-950 leading-none">
                       {client.current_fat_percent}
                     </span>
-                    <ArrowDown01Icon size={16} color="currentColor" className="text-success-600" />
+                    <TrendIcon direction={progressTrend.fat_percent} />
                   </div>
                   <span className="text-[12px] font-normal text-neutral-500">%</span>
                   <span className="text-[12px] font-medium text-neutral-500">Body Fat</span>

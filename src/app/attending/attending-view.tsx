@@ -12,6 +12,7 @@ import {
   type SetEntry,
 } from '@/actions/attending'
 import { cn } from '@/lib/utils'
+import { Spinner } from '@/components/ui/spinner'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -305,9 +306,9 @@ function SessionItem({ session, sessionWeights, onUpdateSet, onComplete }: Sessi
           <button
             onClick={handleComplete}
             disabled={isPending}
-            className="flex h-12 w-full items-center justify-center rounded-base bg-neutral-800 text-[15px] font-normal text-white disabled:opacity-50 mt-2"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-[15px] font-normal text-white disabled:opacity-50 mt-2"
           >
-            {isPending ? 'Completing…' : 'Complete Session'}
+            {isPending ? <><Spinner className="text-white" /> Completing…</> : 'Complete Session'}
           </button>
 
         </div>
