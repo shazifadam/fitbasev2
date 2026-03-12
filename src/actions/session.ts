@@ -72,3 +72,22 @@ export async function rescheduleSession(
   revalidatePath('/dashboard')
   return {}
 }
+
+export async function undoAttendance(attendanceId: string) {
+  const supabase = await createServerClientUntyped()
+
+  const { error } = await supabase
+    .from('attendance')
+    .update({
+      status: 'scheduled',
+      session_started_at: null,
+      session_ended_at: null,
+      session_workout_id: null,
+      exercise_weights: null,
+    })
+    .eq('id', attendanceId)
+
+  if (error) throw error
+  revalidatePath('/dashboard')
+  revalidatePath('/attending')
+}

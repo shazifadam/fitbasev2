@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useCallback } from 'react'
+import { useEffect, useMemo, useCallback, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Calendar01Icon, DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from 'hugeicons-react'
+import { undoAttendance } from '@/actions/session'
 import type { AttendanceWithClient } from '@/actions/dashboard'
 
 const SessionActionDrawer = dynamic(
@@ -42,6 +43,71 @@ function formatEndedTime(dateStr: string | null): string {
   if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+}
+
+// ─── Attended Card with Undo Menu ─────────────────────────────────────────────
+
+function AttendedCard({ item }: { item: AttendanceWithClient }) {
+  const router = useRouter()
+  const [showMenu, setShowMenu] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!showMenu) return
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showMenu])
+
+  function handleUndo() {
+    startTransition(async () => {
+      await undoAttendance(item.id)
+      setShowMenu(false)
+      router.refresh()
+    })
+  }
+
+  return (
+    <div className="flex items-center justify-between rounded-base bg-white border border-neutral-200 p-4">
+      <div className="flex flex-col gap-1">
+        <span className="text-base font-medium text-neutral-950">
+          {item.clients?.name}
+        </span>
+        <span className="text-[13px] font-normal text-neutral-500">
+          {formatPrograms(item.clients?.training_programs)}
+        </span>
+        {item.session_ended_at && (
+          <span className="text-[12px] font-normal text-neutral-400">
+            Marked as attended at {formatEndedTime(item.session_ended_at)}
+          </span>
+        )}
+      </div>
+      <div className="relative" ref={menuRef}>
+        <button
+          onClick={() => setShowMenu(prev => !prev)}
+          className="p-1"
+        >
+          <CheckmarkCircle01Icon size={20} color="currentColor" className="text-success-600 shrink-0" />
+        </button>
+        {showMenu && (
+          <div className="absolute right-0 top-full mt-1 z-10 rounded-base border border-neutral-200 bg-white shadow-lg">
+            <button
+              onClick={handleUndo}
+              disabled={isPending}
+              className="flex items-center whitespace-nowrap px-4 py-2.5 text-[14px] font-normal text-danger-600 disabled:opacity-50"
+            >
+              {isPending ? 'Undoing…' : 'Undo Attendance'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -171,25 +237,7 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
           <div className="flex flex-col gap-3">
             <h2 className="text-xl font-medium text-neutral-950">Attended</h2>
             {attended.map(item => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between rounded-base bg-white border border-neutral-200 p-4"
-              >
-                <div className="flex flex-col gap-1">
-                  <span className="text-base font-medium text-neutral-950">
-                    {item.clients?.name}
-                  </span>
-                  <span className="text-[13px] font-normal text-neutral-500">
-                    {formatPrograms(item.clients?.training_programs)}
-                  </span>
-                  {item.session_ended_at && (
-                    <span className="text-[12px] font-normal text-neutral-400">
-                      Marked as attended at {formatEndedTime(item.session_ended_at)}
-                    </span>
-                  )}
-                </div>
-                <CheckmarkCircle01Icon size={20} color="currentColor" className="text-success-600 shrink-0" />
-              </div>
+              <AttendedCard key={item.id} item={item} />
             ))}
           </div>
         )}
