@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useCallback, useTransition } from 'react'
+import { useEffect, useMemo, useCallback, useTransition, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { HugeiconsIcon, Calendar01Icon, DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from '@/components/ui/icon'
@@ -123,13 +122,15 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
   const router = useRouter()
   const [selectedItem, setSelectedItem] = useState<AttendanceWithClient | null>(null)
   const [showWorkoutDrawer, setShowWorkoutDrawer] = useState(false)
+  const [dateConfirmed, setDateConfirmed] = useState(false)
 
   // Correct to client's local timezone on first mount
   useEffect(() => {
-    // en-CA locale gives YYYY-MM-DD format
     const localToday = new Date().toLocaleDateString('en-CA')
     if (!window.location.search.includes('date=') && date !== localToday) {
       router.replace(`/dashboard?date=${localToday}`)
+    } else {
+      setDateConfirmed(true)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -162,6 +163,22 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
     setShowWorkoutDrawer(false)
     setSelectedItem(null)
   }, [])
+
+  if (!dateConfirmed) {
+    return (
+      <main className="min-h-screen bg-neutral-100 pb-24">
+        <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[13px] font-normal text-neutral-500">Welcome Back</span>
+              <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px]">{trainerName}</h1>
+            </div>
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-800 text-white text-base font-medium">{initials}</div>
+          </div>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { HugeiconsIcon, Calendar01Icon, Cancel01Icon } from '@/components/ui/icon'
 import {
   BottomDrawer,
@@ -35,6 +36,7 @@ type Props = {
 }
 
 export function SessionActionDrawer({ open, attendance, onClose, onStartSession }: Props) {
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [action, setAction] = useState<'absent' | 'reschedule' | null>(null)
   const [showReschedule, setShowReschedule] = useState(false)
@@ -57,6 +59,7 @@ export function SessionActionDrawer({ open, attendance, onClose, onStartSession 
       await markAbsent(attendance.id)
       setAction(null)
       handleClose()
+      router.refresh()
     })
   }
 
@@ -78,6 +81,7 @@ export function SessionActionDrawer({ open, attendance, onClose, onStartSession 
       } else {
         setAction(null)
         handleClose()
+        router.refresh()
       }
     })
   }

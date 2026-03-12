@@ -31,6 +31,7 @@ export {
   Logout01Icon,
   MinusSignIcon,
   Money01Icon,
+  Notebook02Icon,
   MoreHorizontalIcon,
   MoreVerticalIcon,
   PencilEdit01Icon,

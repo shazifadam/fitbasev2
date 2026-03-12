@@ -8,6 +8,7 @@ import {
   ArrowRight01Icon,
   Layers01Icon,
   Dumbbell01Icon,
+  Notebook02Icon,
   Download01Icon,
   InformationCircleIcon,
   SecurityLockIcon,
@@ -91,6 +92,16 @@ export function MoreView({ profile }: Props) {
             <div className="flex items-center gap-3">
               <HugeiconsIcon icon={Dumbbell01Icon} size={20} color="currentColor" className="text-neutral-500" />
               <span className="text-[15px] font-normal text-neutral-950">Exercise Library</span>
+            </div>
+            <HugeiconsIcon icon={ArrowRight01Icon} size={16} color="currentColor" className="text-neutral-400" />
+          </Link>
+          <Link
+            href="/workouts"
+            className="flex items-center justify-between px-4 py-3.5 border-b border-neutral-100"
+          >
+            <div className="flex items-center gap-3">
+              <HugeiconsIcon icon={Notebook02Icon} size={20} color="currentColor" className="text-neutral-500" />
+              <span className="text-[15px] font-normal text-neutral-950">Workout Programs</span>
             </div>
             <HugeiconsIcon icon={ArrowRight01Icon} size={16} color="currentColor" className="text-neutral-400" />
           </Link>

@@ -36,7 +36,6 @@ export type RecordPaymentInput = {
   client_id: string
   amount: number
   currency: string
-  for_month: string        // YYYY-MM format
   payment_method: string
   notes: string
 }

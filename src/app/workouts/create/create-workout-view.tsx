@@ -269,9 +269,10 @@ function SetGrid({
 
 type Props = {
   exercises: ExerciseRow[]
+  clientId?: string | null
 }
 
-export function CreateWorkoutView({ exercises }: Props) {
+export function CreateWorkoutView({ exercises, clientId = null }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [name, setName] = useState('')
@@ -311,7 +312,7 @@ export function CreateWorkoutView({ exercises }: Props) {
       const result = await createWorkout({
         name: name.trim(),
         description: description.trim(),
-        client_id: null,
+        client_id: clientId,
         exercises: workoutExercises.map((we, i) => ({
           exercise_id: we.exercise_id,
           order_index: i,
@@ -321,7 +322,7 @@ export function CreateWorkoutView({ exercises }: Props) {
       if (result.error) {
         setError(result.error)
       } else {
-        router.push(`/workouts/${result.id}`)
+        router.push(clientId ? `/clients/${clientId}` : `/workouts/${result.id}`)
       }
     })
   }

@@ -16,6 +16,7 @@ import {
   Clock01Icon,
   UserRemove01Icon,
   Delete01Icon,
+  Add01Icon,
 } from '@/components/ui/icon'
 import type { ProgressTrend } from '@/actions/progress'
 import { RecordPaymentDrawer } from '@/components/payments/record-payment-drawer'
@@ -420,39 +421,52 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
         {!payment.isOverdue && <PaymentCard payment={payment} clientId={client.id} />}
 
         {/* Workout Routine */}
-        {workouts.length > 0 && (
-          <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
             <span className="text-xl font-medium text-neutral-950">Workout Routine</span>
-            {workouts.map(workout => (
-              <div
-                key={workout.id}
-                className="flex flex-col gap-2.5 rounded-base bg-white border border-neutral-200 p-4"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[15px] font-medium text-neutral-950">{workout.name}</span>
-                  <HugeiconsIcon icon={ArrowRight01Icon} size={18} color="currentColor" className="text-neutral-500" />
-                </div>
-                <span className="text-[13px] font-normal text-neutral-500">
-                  {workout.exercises.length} exercises
-                </span>
-                {workout.exercises.length > 0 && (
-                  <div className="flex flex-col gap-1.5">
-                    {workout.exercises.slice(0, 3).map((ex, i) => (
-                      <span key={i} className="text-[13px] font-normal text-neutral-500">
-                        {ex.name} — {ex.sets > 0 ? `${ex.sets} sets` : 'No sets'}
-                      </span>
-                    ))}
-                    {workout.exercises.length > 3 && (
-                      <span className="text-[13px] font-medium text-neutral-950">
-                        +{workout.exercises.length - 3} more exercises
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+            <button
+              onClick={() => router.push(`/workouts/create?client_id=${client.id}`)}
+              className="flex items-center gap-1.5 text-[13px] font-medium text-neutral-950"
+            >
+              <HugeiconsIcon icon={Add01Icon} size={14} color="currentColor" />
+              Add
+            </button>
           </div>
-        )}
+          {workouts.length === 0 && (
+            <div className="flex items-center justify-center rounded-base border border-neutral-200 bg-white py-8">
+              <span className="text-[14px] font-normal text-neutral-400">No workouts yet</span>
+            </div>
+          )}
+          {workouts.map(workout => (
+            <button
+              key={workout.id}
+              onClick={() => router.push(`/workouts/${workout.id}`)}
+              className="flex flex-col gap-2.5 rounded-base bg-white border border-neutral-200 p-4 w-full text-left"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[15px] font-medium text-neutral-950">{workout.name}</span>
+                <HugeiconsIcon icon={ArrowRight01Icon} size={18} color="currentColor" className="text-neutral-500" />
+              </div>
+              <span className="text-[13px] font-normal text-neutral-500">
+                {workout.exercises.length} exercises
+              </span>
+              {workout.exercises.length > 0 && (
+                <div className="flex flex-col gap-1.5">
+                  {workout.exercises.slice(0, 3).map((ex, i) => (
+                    <span key={i} className="text-[13px] font-normal text-neutral-500">
+                      {ex.name} — {ex.sets > 0 ? `${ex.sets} sets` : 'No sets'}
+                    </span>
+                  ))}
+                  {workout.exercises.length > 3 && (
+                    <span className="text-[13px] font-medium text-neutral-950">
+                      +{workout.exercises.length - 3} more exercises
+                    </span>
+                  )}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
 
       </div>
 

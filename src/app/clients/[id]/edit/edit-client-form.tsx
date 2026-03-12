@@ -49,6 +49,10 @@ export function EditClientForm({ client, tiers }: Props) {
   const [scheduleSet, setScheduleSet] = useState<ScheduleOption>(initialSchedule)
   const [customDays, setCustomDays]   = useState<string[]>(client.custom_days ?? [])
   const [sessionTimes, setSessionTimes] = useState<Record<string, string>>(initialTimes)
+  const [sameTimeForAll, setSameTimeForAll] = useState(() => {
+    const times = Object.values(initialTimes)
+    return times.length <= 1 || times.every(t => t === times[0])
+  })
   const [error, setError] = useState<string | null>(null)
 
   const activeDays = scheduleSet === 'Custom' ? customDays : SCHEDULE_CONFIG[scheduleSet].days
@@ -73,8 +77,24 @@ export function EditClientForm({ client, tiers }: Props) {
     })
   }
 
+  function handleSameTimeToggle(checked: boolean) {
+    setSameTimeForAll(checked)
+    if (checked && activeDays.length > 0) {
+      const firstTime = sessionTimes[activeDays[0]] ?? DEFAULT_TIME
+      const times: Record<string, string> = {}
+      activeDays.forEach(d => { times[d] = firstTime })
+      setSessionTimes(times)
+    }
+  }
+
   function handleTimeChange(day: string, value: string) {
-    setSessionTimes(prev => ({ ...prev, [day]: value }))
+    if (sameTimeForAll) {
+      const times: Record<string, string> = {}
+      activeDays.forEach(d => { times[d] = value })
+      setSessionTimes(times)
+    } else {
+      setSessionTimes(prev => ({ ...prev, [day]: value }))
+    }
   }
 
   function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -243,19 +263,48 @@ export function EditClientForm({ client, tiers }: Props) {
           {activeDays.length > 0 && (
             <div className="flex flex-col gap-2">
               <label className="text-[14px] font-medium text-neutral-950">Session Times</label>
-              <div className="flex flex-col gap-2">
-                {activeDays.map(day => (
-                  <div key={day} className="flex items-center gap-3">
-                    <span className="w-9 text-[14px] font-medium text-neutral-950 shrink-0">{day}</span>
-                    <input
-                      type="time"
-                      value={sessionTimes[day] ?? DEFAULT_TIME}
-                      onChange={e => handleTimeChange(day, e.target.value)}
-                      className="flex-1 h-11 rounded-base border border-neutral-200 px-[14px] text-[14px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
-                    />
-                  </div>
-                ))}
-              </div>
+
+              {/* Same time toggle */}
+              <button
+                type="button"
+                onClick={() => handleSameTimeToggle(!sameTimeForAll)}
+                className="flex items-center gap-2.5 text-left"
+              >
+                <div className={[
+                  'flex h-5 w-5 shrink-0 items-center justify-center rounded-base',
+                  sameTimeForAll ? 'bg-neutral-800' : 'border-[1.5px] border-neutral-300',
+                ].join(' ')}>
+                  {sameTimeForAll && (
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </div>
+                <span className="text-[13px] font-normal text-neutral-500">Same time for all days</span>
+              </button>
+
+              {sameTimeForAll ? (
+                <input
+                  type="time"
+                  value={sessionTimes[activeDays[0]] ?? DEFAULT_TIME}
+                  onChange={e => handleTimeChange(activeDays[0], e.target.value)}
+                  className="h-11 rounded-base border border-neutral-200 px-[14px] text-[14px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
+                />
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {activeDays.map(day => (
+                    <div key={day} className="flex items-center gap-3">
+                      <span className="w-9 text-[14px] font-medium text-neutral-950 shrink-0">{day}</span>
+                      <input
+                        type="time"
+                        value={sessionTimes[day] ?? DEFAULT_TIME}
+                        onChange={e => handleTimeChange(day, e.target.value)}
+                        className="flex-1 h-11 rounded-base border border-neutral-200 px-[14px] text-[14px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

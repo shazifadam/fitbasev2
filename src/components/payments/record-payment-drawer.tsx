@@ -21,36 +21,11 @@ type Props = {
   onSuccess?: () => void
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function getCurrentMonth(): string {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-}
-
-function formatMonthLabel(ym: string): string {
-  const [y, m] = ym.split('-').map(Number)
-  const d = new Date(y, m - 1, 1)
-  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-}
-
-function getMonthOptions(): { value: string; label: string }[] {
-  const options = []
-  const now = new Date()
-  for (let i = -6; i <= 2; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() + i, 1)
-    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    options.push({ value, label: formatMonthLabel(value) })
-  }
-  return options
-}
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, currency = 'MVR', onSuccess }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [forMonth, setForMonth] = useState(getCurrentMonth())
   const [method, setMethod] = useState('Bank Transfer')
   const [notes, setNotes] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -58,7 +33,6 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
   // Reset form when opening
   useEffect(() => {
     if (open) {
-      setForMonth(getCurrentMonth())
       setMethod('Bank Transfer')
       setNotes('')
       setError(null)
@@ -81,7 +55,6 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
         client_id: clientId,
         amount: tierAmount,
         currency,
-        for_month: forMonth,
         payment_method: method,
         notes,
       })
@@ -97,8 +70,6 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
       }
     })
   }
-
-  const monthOptions = getMonthOptions()
 
   return (
     <BottomDrawer open={open} onOpenChange={o => { if (!o) handleClose() }}>
@@ -120,23 +91,6 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
               <span className="text-[15px] font-medium text-neutral-950">
                 {tierAmount != null ? tierAmount.toFixed(2) : '—'}
               </span>
-            </div>
-          </div>
-
-          {/* For Month */}
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[14px] font-normal text-neutral-950">For Month</span>
-            <div className="relative">
-              <select
-                value={forMonth}
-                onChange={e => setForMonth(e.target.value)}
-                className="h-11 w-full rounded-base border border-neutral-200 px-3 pr-10 text-[15px] font-normal text-neutral-950 bg-white outline-none appearance-none"
-              >
-                {monthOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <HugeiconsIcon icon={ArrowDown01Icon} size={18} color="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
             </div>
           </div>
 
