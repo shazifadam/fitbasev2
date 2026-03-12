@@ -35,7 +35,6 @@ function formatMonthLabel(ym: string): string {
 function getMonthOptions(): { value: string; label: string }[] {
   const options = []
   const now = new Date()
-  // Show 6 months back + current + 2 ahead
   for (let i = -6; i <= 2; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() + i, 1)
     const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
@@ -49,7 +48,6 @@ function getMonthOptions(): { value: string; label: string }[] {
 export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, currency = 'OMR' }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [amount, setAmount] = useState(tierAmount?.toFixed(2) ?? '')
   const [forMonth, setForMonth] = useState(getCurrentMonth())
   const [method, setMethod] = useState('Cash')
   const [notes, setNotes] = useState('')
@@ -58,13 +56,12 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
   // Reset form when opening
   useEffect(() => {
     if (open) {
-      setAmount(tierAmount?.toFixed(2) ?? '')
       setForMonth(getCurrentMonth())
       setMethod('Cash')
       setNotes('')
       setError(null)
     }
-  }, [open, tierAmount])
+  }, [open])
 
   function handleClose() {
     setError(null)
@@ -72,16 +69,15 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
   }
 
   function handleSubmit() {
-    const parsedAmount = parseFloat(amount)
-    if (!parsedAmount || parsedAmount <= 0) {
-      setError('Please enter a valid amount')
+    if (!tierAmount || tierAmount <= 0) {
+      setError('No tier amount set for this client')
       return
     }
     setError(null)
     startTransition(async () => {
       const result = await recordPayment({
         client_id: clientId,
-        amount: parsedAmount,
+        amount: tierAmount,
         currency,
         for_month: forMonth,
         payment_method: method,
@@ -111,18 +107,14 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
             </button>
           </div>
 
-          {/* Amount */}
+          {/* Amount (read-only from tier) */}
           <div className="flex flex-col gap-1.5">
             <span className="text-[14px] font-normal text-neutral-950">Amount ({currency})</span>
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              value={amount}
-              onChange={e => setAmount(e.target.value)}
-              placeholder="0.00"
-              className="h-11 rounded-base border border-neutral-200 px-3 text-[15px] font-normal text-neutral-950 bg-white outline-none focus:border-neutral-800 placeholder:text-neutral-400"
-            />
+            <div className="flex h-11 items-center rounded-base border border-neutral-200 bg-neutral-50 px-3">
+              <span className="text-[15px] font-medium text-neutral-950">
+                {tierAmount != null ? tierAmount.toFixed(2) : '—'}
+              </span>
+            </div>
           </div>
 
           {/* For Month */}
@@ -173,7 +165,7 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
           {/* Submit */}
           <button
             onClick={handleSubmit}
-            disabled={isPending}
+            disabled={isPending || !tierAmount}
             className="flex h-[52px] w-full items-center justify-center rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
           >
             {isPending ? 'Recording…' : 'Record Payment'}
