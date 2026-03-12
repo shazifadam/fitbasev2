@@ -49,7 +49,8 @@ function formatPaymentDate(dateStr: string | null): string {
 
 // ─── Attendance Dot Grid ─────────────────────────────────────────────────────
 
-function AttendanceDotGrid({ attendance }: { attendance: AttendanceHistoryRow[] }) {
+function AttendanceDotGrid({ attendance, clientId }: { attendance: AttendanceHistoryRow[]; clientId: string }) {
+  const router = useRouter()
   const recent = attendance.slice(0, 14).reverse()
   const row1 = recent.slice(0, 7)
   const row2 = recent.slice(7, 14)
@@ -64,7 +65,7 @@ function AttendanceDotGrid({ attendance }: { attendance: AttendanceHistoryRow[] 
     <div className="flex flex-col gap-3 rounded-base bg-white border border-neutral-200 p-4">
       <div className="flex items-center justify-between">
         <span className="text-base font-medium text-neutral-950">Last 2 Weeks Attendance</span>
-        <span className="text-[13px] font-medium text-neutral-950">View Full</span>
+        <button onClick={() => router.push(`/clients/${clientId}/attendance`)} className="text-[13px] font-medium text-neutral-950">View Full</button>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -222,7 +223,7 @@ export function ClientDetailView({ client, attendance, payment, workouts }: Prop
 
         {/* Attendance Dot Grid */}
         {attendance.length > 0 && (
-          <AttendanceDotGrid attendance={attendance} />
+          <AttendanceDotGrid attendance={attendance} clientId={client.id} />
         )}
 
         {/* Workout Routine */}

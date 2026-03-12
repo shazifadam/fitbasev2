@@ -187,6 +187,27 @@ export async function getClientAttendance(clientId: string): Promise<AttendanceH
   return (data ?? []) as AttendanceHistoryRow[]
 }
 
+// ─── Monthly Attendance ──────────────────────────────────────────────────────
+
+export async function getClientAttendanceRange(
+  clientId: string,
+  from: string,
+  to: string,
+): Promise<AttendanceHistoryRow[]> {
+  const supabase = await createServerClientUntyped()
+
+  const { data, error } = await supabase
+    .from('attendance')
+    .select('id, scheduled_date, scheduled_time, status, session_started_at, session_ended_at')
+    .eq('client_id', clientId)
+    .gte('scheduled_date', from)
+    .lte('scheduled_date', to)
+    .order('scheduled_date', { ascending: true })
+
+  if (error) return []
+  return (data ?? []) as AttendanceHistoryRow[]
+}
+
 // ─── Payment Status ──────────────────────────────────────────────────────────
 
 export type PaymentStatus = {
