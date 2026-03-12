@@ -1,13 +1,21 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Calendar01Icon, DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from 'hugeicons-react'
 import type { AttendanceWithClient } from '@/actions/dashboard'
-import { SessionActionDrawer } from '@/components/dashboard/session-action-drawer'
-import { SelectWorkoutDrawer } from '@/components/dashboard/select-workout-drawer'
+
+const SessionActionDrawer = dynamic(
+  () => import('@/components/dashboard/session-action-drawer').then(m => m.SessionActionDrawer),
+  { ssr: false }
+)
+const SelectWorkoutDrawer = dynamic(
+  () => import('@/components/dashboard/select-workout-drawer').then(m => m.SelectWorkoutDrawer),
+  { ssr: false }
+)
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -58,23 +66,35 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const attending = attendance.filter(a => a.status === 'attending')
-  const scheduled = attendance.filter(a => a.status === 'scheduled')
-  const attended = attendance.filter(a => a.status === 'attended')
-  const absent = attendance.filter(a => a.status === 'missed')
+  const { attending, scheduled, attended, absent } = useMemo(() => ({
+    attending: attendance.filter(a => a.status === 'attending'),
+    scheduled: attendance.filter(a => a.status === 'scheduled'),
+    attended: attendance.filter(a => a.status === 'attended'),
+    absent: attendance.filter(a => a.status === 'missed'),
+  }), [attendance])
 
-  const byTime = scheduled.reduce<Record<string, AttendanceWithClient[]>>(
-    (acc, item) => {
-      const time = formatTime(item.scheduled_time)
-      if (!acc[time]) acc[time] = []
-      acc[time].push(item)
-      return acc
-    },
-    {}
-  )
-  const timeGroups = Object.entries(byTime).sort(([a], [b]) => a.localeCompare(b))
+  const timeGroups = useMemo(() => {
+    const byTime = scheduled.reduce<Record<string, AttendanceWithClient[]>>(
+      (acc, item) => {
+        const time = formatTime(item.scheduled_time)
+        if (!acc[time]) acc[time] = []
+        acc[time].push(item)
+        return acc
+      },
+      {}
+    )
+    return Object.entries(byTime).sort(([a], [b]) => a.localeCompare(b))
+  }, [scheduled])
 
   const initials = getInitials(trainerName)
+
+  const handleSelectItem = useCallback((item: AttendanceWithClient) => setSelectedItem(item), [])
+  const handleCloseDrawer = useCallback(() => setSelectedItem(null), [])
+  const handleStartSession = useCallback(() => setShowWorkoutDrawer(true), [])
+  const handleCloseWorkoutDrawer = useCallback(() => {
+    setShowWorkoutDrawer(false)
+    setSelectedItem(null)
+  }, [])
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">
@@ -128,7 +148,7 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
               <button
                 key={item.id}
                 className="flex items-center justify-between rounded-base bg-white border border-neutral-200 p-4 w-full text-left"
-                onClick={() => setSelectedItem(item)}
+                onClick={() => handleSelectItem(item)}
               >
                 <div className="flex flex-col gap-0.5">
                   <span className="text-base font-medium text-neutral-950">
@@ -210,18 +230,15 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
       <SessionActionDrawer
         open={selectedItem !== null && !showWorkoutDrawer}
         attendance={selectedItem}
-        onClose={() => setSelectedItem(null)}
-        onStartSession={() => setShowWorkoutDrawer(true)}
+        onClose={handleCloseDrawer}
+        onStartSession={handleStartSession}
       />
 
       {/* Select Workout Drawer */}
       <SelectWorkoutDrawer
         open={showWorkoutDrawer}
         attendance={selectedItem}
-        onClose={() => {
-          setShowWorkoutDrawer(false)
-          setSelectedItem(null)
-        }}
+        onClose={handleCloseWorkoutDrawer}
       />
 
     </main>

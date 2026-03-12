@@ -76,11 +76,16 @@ export function AttendingView({ sessions, trainerName }: Props) {
     value: number | boolean | null,
   ) {
     setWeights(prev => {
-      const copy = JSON.parse(JSON.stringify(prev)) as typeof prev
-      const set = copy[sessionId].exercises[exIdx].sets[setIdx]
-      if (field === 'completed') set.completed = value as boolean
-      else set[field] = value as number | null
-      return copy
+      const session = prev[sessionId]
+      const newSets = session.exercises[exIdx].sets.map((s, i) =>
+        i === setIdx
+          ? { ...s, [field]: value }
+          : s
+      )
+      const newExercises = session.exercises.map((ex, i) =>
+        i === exIdx ? { ...ex, sets: newSets } : ex
+      )
+      return { ...prev, [sessionId]: { exercises: newExercises } }
     })
   }
 
