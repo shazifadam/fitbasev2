@@ -229,7 +229,7 @@ export async function getClientPaymentStatus(clientId: string): Promise<PaymentS
     .limit(1)
     .single()
 
-  if (!data) return { lastPaymentDate: null, validUntil: null, amount: null, currency: 'OMR', isOverdue: false }
+  if (!data) return { lastPaymentDate: null, validUntil: null, amount: null, currency: 'MVR', isOverdue: false }
 
   const payment = data as { payment_date: string; valid_until: string; amount: number; currency: string }
   const today = new Date().toISOString().split('T')[0]
@@ -239,7 +239,7 @@ export async function getClientPaymentStatus(clientId: string): Promise<PaymentS
     lastPaymentDate: payment.payment_date,
     validUntil: payment.valid_until,
     amount: payment.amount,
-    currency: payment.currency ?? 'OMR',
+    currency: payment.currency ?? 'MVR',
     isOverdue,
   }
 }

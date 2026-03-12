@@ -68,7 +68,7 @@ export function RecordPaymentSelectClient({ clients }: Props) {
                 <div className="flex flex-col">
                   <span className="text-[15px] font-medium text-neutral-950">{c.name}</span>
                   <span className="text-[13px] font-normal text-neutral-500">
-                    {c.tierName ?? 'No tier'}{c.tierAmount ? ` · OMR ${c.tierAmount.toFixed(2)}/mo` : ''}
+                    {c.tierName ?? 'No tier'}{c.tierAmount ? ` · MVR${c.tierAmount.toFixed(2)}/mo` : ''}
                   </span>
                 </div>
               </div>
@@ -89,6 +89,7 @@ export function RecordPaymentSelectClient({ clients }: Props) {
           onClose={() => setSelected(null)}
           clientId={selected.id}
           tierAmount={selected.tierAmount}
+          onSuccess={() => router.push('/dashboard')}
         />
       )}
     </main>

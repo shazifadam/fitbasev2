@@ -72,7 +72,7 @@ export function BottomNav() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="fixed bottom-20 left-1/2 z-50 -translate-x-1/2 w-full max-w-[428px] px-6 pb-4"
+              className="fixed bottom-20 left-0 right-0 z-50 mx-auto w-full max-w-[428px] px-6 pb-4"
             >
               <div className="rounded-base border border-neutral-200 bg-white shadow-lg overflow-hidden py-1">
                 {fabMenuItems.map((item, i) => {

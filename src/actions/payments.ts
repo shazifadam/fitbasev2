@@ -72,7 +72,7 @@ export async function getPaymentHistory(clientId: string): Promise<PaymentHistor
   const rows = (payments ?? []) as PaymentRow[]
 
   const totalPaid = rows.reduce((sum, p) => sum + Number(p.amount), 0)
-  const currency = rows[0]?.currency ?? 'OMR'
+  const currency = rows[0]?.currency ?? 'MVR'
 
   // Calculate pending: tier amount if latest payment is overdue or no payments exist
   const tierAmount = c.tiers?.amount ?? 0

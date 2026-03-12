@@ -87,7 +87,7 @@ function TierDrawer({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-[14px] font-normal text-neutral-950">Price (OMR)</span>
+            <span className="text-[14px] font-normal text-neutral-950">Price (MVR)</span>
             <input
               type="number"
               inputMode="decimal"
@@ -201,7 +201,7 @@ export function TierManagementView({ tiers }: Props) {
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[15px] font-medium text-neutral-950">{tier.name}</span>
                   <span className="text-[13px] font-normal text-neutral-500">
-                    OMR {Number(tier.amount).toFixed(2)} / month
+                    MVR {Number(tier.amount).toFixed(2)} / month
                   </span>
                 </div>
                 <div className="flex items-center gap-3">

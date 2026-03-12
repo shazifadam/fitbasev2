@@ -75,8 +75,7 @@ export function RecordProgressForm({ client, previous }: Props) {
       if (result.error) {
         setError(result.error)
       } else {
-        router.back()
-        router.refresh()
+        router.push('/dashboard')
       }
     })
   }
@@ -108,75 +107,7 @@ export function RecordProgressForm({ client, previous }: Props) {
           </div>
         </div>
 
-        {/* Date */}
-        <div className="flex flex-col gap-2">
-          <span className="text-[14px] font-medium text-neutral-950">Date</span>
-          <div className="relative">
-            <input
-              type="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              className="h-12 w-full rounded-base border border-neutral-200 bg-white px-4 text-[15px] font-normal text-neutral-950 outline-none focus:border-neutral-800"
-            />
-          </div>
-        </div>
-
-        {/* Measurements */}
-        <div className="flex flex-col gap-4">
-          <span className="text-xl font-medium text-neutral-950">Measurements</span>
-
-          <div className="flex flex-col gap-2">
-            <span className="text-[14px] font-medium text-neutral-950">Weight (kg)</span>
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.1"
-              value={weight}
-              onChange={e => setWeight(e.target.value)}
-              placeholder="e.g. 72.5"
-              className="h-12 rounded-base border border-neutral-200 bg-white px-4 text-[15px] font-normal text-neutral-950 outline-none focus:border-neutral-800 placeholder:text-neutral-400"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <span className="text-[14px] font-medium text-neutral-950">Height (cm)</span>
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.1"
-              value={height}
-              onChange={e => setHeight(e.target.value)}
-              placeholder="e.g. 175"
-              className="h-12 rounded-base border border-neutral-200 bg-white px-4 text-[15px] font-normal text-neutral-950 outline-none focus:border-neutral-800 placeholder:text-neutral-400"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <span className="text-[14px] font-medium text-neutral-950">Body Fat (%)</span>
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.1"
-              value={fatPercent}
-              onChange={e => setFatPercent(e.target.value)}
-              placeholder="e.g. 18.0"
-              className="h-12 rounded-base border border-neutral-200 bg-white px-4 text-[15px] font-normal text-neutral-950 outline-none focus:border-neutral-800 placeholder:text-neutral-400"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <span className="text-[14px] font-medium text-neutral-950">Notes (optional)</span>
-            <textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="Good progress this month, continue current diet plan."
-              rows={3}
-              className="rounded-base border border-neutral-200 bg-white px-4 py-3 text-[15px] font-normal text-neutral-950 outline-none focus:border-neutral-800 placeholder:text-neutral-400 resize-none"
-            />
-          </div>
-        </div>
-
-        {/* Previous Measurement */}
+        {/* Previous Measurement — shown at top */}
         {previous && (
           <div className="flex flex-col gap-3">
             <span className="text-[16px] font-medium text-neutral-950">Previous Measurement</span>
@@ -205,6 +136,72 @@ export function RecordProgressForm({ client, previous }: Props) {
             </span>
           </div>
         )}
+
+        {/* Date */}
+        <div className="flex flex-col gap-2">
+          <span className="text-[14px] font-medium text-neutral-950">Date</span>
+          <input
+            type="date"
+            value={date}
+            onChange={e => setDate(e.target.value)}
+            className="h-12 w-full rounded-base border border-neutral-200 bg-white px-4 text-[15px] font-normal text-neutral-950 outline-none focus:border-neutral-800 box-border"
+          />
+        </div>
+
+        {/* Measurements */}
+        <div className="flex flex-col gap-4">
+          <span className="text-xl font-medium text-neutral-950">Measurements</span>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-[14px] font-medium text-neutral-950">Weight (kg)</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.1"
+              value={weight}
+              onChange={e => setWeight(e.target.value)}
+              placeholder="e.g. 72.5"
+              className="h-12 w-full rounded-base border border-neutral-200 bg-white px-4 text-[15px] font-normal text-neutral-950 outline-none focus:border-neutral-800 placeholder:text-neutral-400"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-[14px] font-medium text-neutral-950">Height (cm)</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.1"
+              value={height}
+              onChange={e => setHeight(e.target.value)}
+              placeholder="e.g. 175"
+              className="h-12 w-full rounded-base border border-neutral-200 bg-white px-4 text-[15px] font-normal text-neutral-950 outline-none focus:border-neutral-800 placeholder:text-neutral-400"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-[14px] font-medium text-neutral-950">Body Fat (%)</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.1"
+              value={fatPercent}
+              onChange={e => setFatPercent(e.target.value)}
+              placeholder="e.g. 18.0"
+              className="h-12 w-full rounded-base border border-neutral-200 bg-white px-4 text-[15px] font-normal text-neutral-950 outline-none focus:border-neutral-800 placeholder:text-neutral-400"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-[14px] font-medium text-neutral-950">Notes (optional)</span>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="Good progress this month, continue current diet plan."
+              rows={3}
+              className="w-full rounded-base border border-neutral-200 bg-white px-4 py-3 text-[15px] font-normal text-neutral-950 outline-none focus:border-neutral-800 placeholder:text-neutral-400 resize-none"
+            />
+          </div>
+        </div>
 
         {/* Error */}
         {error && (

@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Cancel01Icon } from 'hugeicons-react'
+import { Cancel01Icon, ArrowDown01Icon } from 'hugeicons-react'
 import {
   BottomDrawer,
   BottomDrawerContent,
@@ -17,6 +17,7 @@ type Props = {
   clientId: string
   tierAmount: number | null
   currency?: string
+  onSuccess?: () => void
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -45,11 +46,11 @@ function getMonthOptions(): { value: string; label: string }[] {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, currency = 'OMR' }: Props) {
+export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, currency = 'MVR', onSuccess }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [forMonth, setForMonth] = useState(getCurrentMonth())
-  const [method, setMethod] = useState('Cash')
+  const [method, setMethod] = useState('Bank Transfer')
   const [notes, setNotes] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -57,7 +58,7 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
   useEffect(() => {
     if (open) {
       setForMonth(getCurrentMonth())
-      setMethod('Cash')
+      setMethod('Bank Transfer')
       setNotes('')
       setError(null)
     }
@@ -87,7 +88,11 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
         setError(result.error)
       } else {
         handleClose()
-        router.refresh()
+        if (onSuccess) {
+          onSuccess()
+        } else {
+          router.refresh()
+        }
       }
     })
   }
@@ -120,30 +125,36 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
           {/* For Month */}
           <div className="flex flex-col gap-1.5">
             <span className="text-[14px] font-normal text-neutral-950">For Month</span>
-            <select
-              value={forMonth}
-              onChange={e => setForMonth(e.target.value)}
-              className="h-11 rounded-base border border-neutral-200 px-3 text-[15px] font-normal text-neutral-950 bg-white outline-none appearance-none"
-            >
-              {monthOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={forMonth}
+                onChange={e => setForMonth(e.target.value)}
+                className="h-11 w-full rounded-base border border-neutral-200 px-3 pr-10 text-[15px] font-normal text-neutral-950 bg-white outline-none appearance-none"
+              >
+                {monthOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              <ArrowDown01Icon size={18} color="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+            </div>
           </div>
 
           {/* Payment Method */}
           <div className="flex flex-col gap-1.5">
             <span className="text-[14px] font-normal text-neutral-950">Payment Method</span>
-            <select
-              value={method}
-              onChange={e => setMethod(e.target.value)}
-              className="h-11 rounded-base border border-neutral-200 px-3 text-[15px] font-normal text-neutral-950 bg-white outline-none appearance-none"
-            >
-              <option value="Cash">Cash</option>
-              <option value="Bank Transfer">Bank Transfer</option>
-              <option value="Card">Card</option>
-              <option value="Other">Other</option>
-            </select>
+            <div className="relative">
+              <select
+                value={method}
+                onChange={e => setMethod(e.target.value)}
+                className="h-11 w-full rounded-base border border-neutral-200 px-3 pr-10 text-[15px] font-normal text-neutral-950 bg-white outline-none appearance-none"
+              >
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="Other">Other</option>
+              </select>
+              <ArrowDown01Icon size={18} color="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+            </div>
           </div>
 
           {/* Notes */}
