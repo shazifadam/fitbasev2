@@ -127,6 +127,66 @@ export async function getTiers(): Promise<TierRow[]> {
   return (seeded ?? []) as TierRow[]
 }
 
+// ─── Detail ──────────────────────────────────────────────────────────────────
+
+export type ClientDetail = {
+  id: string
+  name: string
+  phone: string
+  training_programs: string[] | null
+  schedule_set: string
+  custom_days: string[] | null
+  session_times: Record<string, string> | null
+  tier_id: string | null
+  current_weight: number | null
+  current_waist: number | null
+  current_fat_percent: number | null
+  current_height: number | null
+  created_at: string | null
+  tiers: { name: string } | null
+}
+
+export type AttendanceHistoryRow = {
+  id: string
+  scheduled_date: string
+  scheduled_time: string
+  status: string | null
+  session_started_at: string | null
+  session_ended_at: string | null
+}
+
+export async function getClientDetail(clientId: string): Promise<ClientDetail | null> {
+  const supabase = await createServerClientUntyped()
+
+  const { data, error } = await supabase
+    .from('clients')
+    .select(`
+      id, name, phone, training_programs, schedule_set, custom_days,
+      session_times, tier_id, current_weight, current_waist,
+      current_fat_percent, current_height, created_at,
+      tiers(name)
+    `)
+    .eq('id', clientId)
+    .single()
+
+  if (error || !data) return null
+  return data as unknown as ClientDetail
+}
+
+export async function getClientAttendance(clientId: string): Promise<AttendanceHistoryRow[]> {
+  const supabase = await createServerClientUntyped()
+
+  const { data, error } = await supabase
+    .from('attendance')
+    .select('id, scheduled_date, scheduled_time, status, session_started_at, session_ended_at')
+    .eq('client_id', clientId)
+    .order('scheduled_date', { ascending: false })
+    .limit(20)
+
+  if (error) return []
+  return (data ?? []) as AttendanceHistoryRow[]
+}
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 export async function createClient(

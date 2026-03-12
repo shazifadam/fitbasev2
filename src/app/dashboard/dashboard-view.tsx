@@ -127,18 +127,20 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
           />
         </label>
 
-        {/* Summary Banner — taps through to /attending */}
-        <Link
-          href="/attending"
-          className="flex items-center justify-between rounded-base bg-neutral-800 px-4 py-4"
-        >
-          <span className="text-[15px] font-medium text-white">Attending</span>
-          <div className="flex items-center justify-center rounded-full bg-white/[0.13] px-[14px] py-[6px]">
-            <span className="text-[13px] font-medium text-white">
-              {attending.length} attending
-            </span>
-          </div>
-        </Link>
+        {/* Summary Banner — hidden when 0 attending (PRD 1.1) */}
+        {attending.length > 0 && (
+          <Link
+            href="/attending"
+            className="flex items-center justify-between rounded-base bg-neutral-800 px-4 py-4"
+          >
+            <span className="text-[15px] font-medium text-white">Attending</span>
+            <div className="flex items-center justify-center rounded-full bg-white/[0.13] px-[14px] py-[6px]">
+              <span className="text-[13px] font-medium text-white">
+                {attending.length} attending
+              </span>
+            </div>
+          </Link>
+        )}
 
         {/* Time Groups — scheduled only */}
         {timeGroups.map(([time, clients]) => (

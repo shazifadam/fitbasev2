@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import * as Accordion from '@radix-ui/react-accordion'
 import { ArrowDown01Icon, CheckmarkCircle01Icon } from 'hugeicons-react'
@@ -49,6 +49,27 @@ function initWeights(session: AttendingSession): ExerciseWeights {
     return { exercises }
   }
   return { exercises: [] }
+}
+
+// ─── Elapsed Timer Hook ───────────────────────────────────────────────────────
+
+function useElapsed(startIso: string | null): string {
+  const [now, setNow] = useState(Date.now())
+
+  useEffect(() => {
+    if (!startIso) return
+    const id = setInterval(() => setNow(Date.now()), 60_000) // update every minute
+    return () => clearInterval(id)
+  }, [startIso])
+
+  if (!startIso) return ''
+  const diffMs = now - new Date(startIso).getTime()
+  if (diffMs < 0) return '0:00'
+  const totalMin = Math.floor(diffMs / 60_000)
+  const hrs = Math.floor(totalMin / 60)
+  const mins = totalMin % 60
+  if (hrs > 0) return `${hrs}:${String(mins).padStart(2, '0')}`
+  return `${mins}m`
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -158,6 +179,7 @@ function SessionItem({ session, sessionWeights, onUpdateSet, onComplete }: Sessi
   const clientName = session.clients?.name ?? 'Unknown'
   const workoutName = session.workouts?.name
   const hasExercises = sessionWeights.exercises.length > 0
+  const elapsed = useElapsed(session.session_started_at)
 
   function handleComplete() {
     setError(null)
@@ -178,15 +200,21 @@ function SessionItem({ session, sessionWeights, onUpdateSet, onComplete }: Sessi
         <div className="flex flex-col gap-0.5">
           <span className="text-base font-medium text-neutral-950">{clientName}</span>
           <span className="text-[13px] font-normal text-neutral-500">
-            Started {formatStartedTime(session.session_started_at)}
-            {workoutName ? ` · ${workoutName}` : ''}
+            {workoutName ?? 'No workout'}
           </span>
         </div>
-        <ArrowDown01Icon
-          size={20}
-          color="currentColor"
-          className="text-neutral-400 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
-        />
+        <div className="flex items-center gap-3">
+          {elapsed && (
+            <span className="text-[13px] font-normal text-neutral-400 tabular-nums">
+              {elapsed}
+            </span>
+          )}
+          <ArrowDown01Icon
+            size={20}
+            color="currentColor"
+            className="text-neutral-400 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+          />
+        </div>
       </Accordion.Trigger>
 
       {/* Content */}
