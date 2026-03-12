@@ -337,6 +337,65 @@ export async function createClient(
   return {}
 }
 
+export async function updateClient(
+  clientId: string,
+  input: CreateClientInput,
+): Promise<{ error?: string }> {
+  const supabase = await createServerClientUntyped()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data: trainer } = await supabase
+    .from('users').select('id').eq('auth_id', user.id).single()
+  if (!trainer) return { error: 'Trainer not found' }
+
+  const trainerId = (trainer as { id: string }).id
+
+  const { error } = await supabase
+    .from('clients')
+    .update({
+      name: input.name,
+      phone: input.phone,
+      training_programs: input.training_programs,
+      tier_id: input.tier_id || null,
+      schedule_set: input.schedule_set,
+      custom_days: input.custom_days,
+      session_times: input.session_times,
+    })
+    .eq('id', clientId)
+
+  if (error) return { error: error.message }
+
+  // Delete future scheduled attendance and regenerate
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+  await supabase
+    .from('attendance')
+    .delete()
+    .eq('client_id', clientId)
+    .eq('status', 'scheduled')
+    .gte('scheduled_date', todayStr)
+
+  const days = getScheduleDays(input.schedule_set, input.custom_days)
+  const attendanceRows = generateAttendanceRecords(
+    clientId,
+    trainerId,
+    days,
+    input.session_times,
+    todayStr,
+  )
+
+  if (attendanceRows.length > 0) {
+    await supabase.from('attendance').insert(attendanceRows)
+  }
+
+  revalidatePath('/clients')
+  revalidatePath(`/clients/${clientId}`)
+  revalidatePath('/dashboard')
+  return {}
+}
+
 export async function deactivateClient(clientId: string): Promise<{ error?: string }> {
   const supabase = await createServerClientUntyped()
 

@@ -9,6 +9,7 @@ import {
   ArrowRight01Icon,
   Money01Icon,
   ChartLineData01Icon,
+  PencilEdit01Icon,
   Clock01Icon,
   UserRemove01Icon,
   Delete01Icon,
@@ -58,11 +59,13 @@ function formatPaymentDate(dateStr: string | null): string {
 // ─── Dropdown Menu ──────────────────────────────────────────────────────────
 
 function ClientMenu({
+  onEditClient,
   onRecordPayment,
   onRecordProgress,
   onDeactivate,
   onDelete,
 }: {
+  onEditClient: () => void
   onRecordPayment: () => void
   onRecordProgress: () => void
   onDeactivate: () => void
@@ -89,6 +92,13 @@ function ClientMenu({
       </button>
       {open && (
         <div className="absolute right-0 top-full mt-1 z-10 rounded-base border border-neutral-200 bg-white shadow-lg py-2 min-w-[200px]">
+          <button
+            onClick={() => { setOpen(false); onEditClient() }}
+            className="flex w-full items-center gap-3 px-4 py-2.5 text-[14px] font-normal text-neutral-950 text-left"
+          >
+            <PencilEdit01Icon size={18} color="currentColor" className="text-neutral-500" />
+            Edit Client
+          </button>
           <button
             onClick={() => { setOpen(false); onRecordPayment() }}
             className="flex w-full items-center gap-3 px-4 py-2.5 text-[14px] font-normal text-neutral-950 text-left"
@@ -305,6 +315,7 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
             {client.name}
           </h1>
           <ClientMenu
+            onEditClient={() => router.push(`/clients/${client.id}/edit`)}
             onRecordPayment={() => setShowPaymentDrawer(true)}
             onRecordProgress={() => router.push(`/progress/record/${client.id}`)}
             onDeactivate={handleDeactivate}
