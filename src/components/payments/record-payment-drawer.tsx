@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Cancel01Icon, ArrowDown01Icon } from 'hugeicons-react'
+import { HugeiconsIcon, Cancel01Icon, ArrowDown01Icon } from '@/components/ui/icon'
 import {
   BottomDrawer,
   BottomDrawerContent,
@@ -109,7 +109,7 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
           <div className="flex items-center justify-between">
             <span className="text-xl font-medium text-neutral-950">Record Payment</span>
             <button onClick={handleClose} className="text-neutral-400">
-              <Cancel01Icon size={24} color="currentColor" />
+              <HugeiconsIcon icon={Cancel01Icon} size={24} color="currentColor" />
             </button>
           </div>
 
@@ -136,7 +136,7 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
-              <ArrowDown01Icon size={18} color="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+              <HugeiconsIcon icon={ArrowDown01Icon} size={18} color="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
             </div>
           </div>
 
@@ -154,7 +154,7 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
                 <option value="Card">Card</option>
                 <option value="Other">Other</option>
               </select>
-              <ArrowDown01Icon size={18} color="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+              <HugeiconsIcon icon={ArrowDown01Icon} size={18} color="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
             </div>
           </div>
 

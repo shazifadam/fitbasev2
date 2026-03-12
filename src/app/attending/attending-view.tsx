@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import * as Accordion from '@radix-ui/react-accordion'
-import { ArrowDown01Icon, CheckmarkCircle01Icon } from 'hugeicons-react'
+import { HugeiconsIcon, ArrowDown01Icon, CheckmarkCircle01Icon } from '@/components/ui/icon'
 import {
   completeSession,
   type AttendingSession,
@@ -203,7 +203,8 @@ function SessionItem({ session, sessionWeights, onUpdateSet, onComplete }: Sessi
               {elapsed}
             </span>
           )}
-          <ArrowDown01Icon
+          <HugeiconsIcon
+            icon={ArrowDown01Icon}
             size={20}
             color="currentColor"
             className="text-neutral-400 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
@@ -288,7 +289,7 @@ function SessionItem({ session, sessionWeights, onUpdateSet, onComplete }: Sessi
                       )}
                     >
                       {set.completed && (
-                        <CheckmarkCircle01Icon size={14} color="white" />
+                        <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} color="white" />
                       )}
                     </button>
                   </div>

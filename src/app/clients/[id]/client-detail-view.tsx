@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  HugeiconsIcon,
   ArrowLeft01Icon,
   ArrowUp01Icon,
   MoreVerticalIcon,
@@ -15,7 +16,7 @@ import {
   Clock01Icon,
   UserRemove01Icon,
   Delete01Icon,
-} from 'hugeicons-react'
+} from '@/components/ui/icon'
 import type { ProgressTrend } from '@/actions/progress'
 import { RecordPaymentDrawer } from '@/components/payments/record-payment-drawer'
 import { deactivateClient, deleteClient } from '@/actions/clients'
@@ -91,7 +92,7 @@ function ClientMenu({
   return (
     <div className="relative" ref={menuRef}>
       <button onClick={() => setOpen(prev => !prev)} className="p-1">
-        <MoreVerticalIcon size={22} color="currentColor" className="text-neutral-500" />
+        <HugeiconsIcon icon={MoreVerticalIcon} size={22} color="currentColor" className="text-neutral-500" />
       </button>
       {open && (
         <div className="absolute right-0 top-full mt-1 z-10 rounded-base border border-neutral-200 bg-white shadow-lg py-2 min-w-[200px]">
@@ -99,35 +100,35 @@ function ClientMenu({
             onClick={() => { setOpen(false); onEditClient() }}
             className="flex w-full items-center gap-3 px-4 py-3.5 text-[14px] font-normal text-neutral-950 text-left"
           >
-            <PencilEdit01Icon size={18} color="currentColor" className="text-neutral-500" />
+            <HugeiconsIcon icon={PencilEdit01Icon} size={18} color="currentColor" className="text-neutral-500" />
             Edit Client
           </button>
           <button
             onClick={() => { setOpen(false); onRecordPayment() }}
             className="flex w-full items-center gap-3 px-4 py-3.5 text-[14px] font-normal text-neutral-950 text-left"
           >
-            <Money01Icon size={18} color="currentColor" className="text-neutral-500" />
+            <HugeiconsIcon icon={Money01Icon} size={18} color="currentColor" className="text-neutral-500" />
             Record Payment
           </button>
           <button
             onClick={() => { setOpen(false); onRecordProgress() }}
             className="flex w-full items-center gap-3 px-4 py-3.5 text-[14px] font-normal text-neutral-950 text-left"
           >
-            <ChartLineData01Icon size={18} color="currentColor" className="text-neutral-500" />
+            <HugeiconsIcon icon={ChartLineData01Icon} size={18} color="currentColor" className="text-neutral-500" />
             Record Progress
           </button>
           <button
             onClick={() => { setOpen(false); onDeactivate() }}
             className="flex w-full items-center gap-3 px-4 py-3.5 text-[14px] font-normal text-neutral-950 text-left"
           >
-            <UserRemove01Icon size={18} color="currentColor" className="text-neutral-500" />
+            <HugeiconsIcon icon={UserRemove01Icon} size={18} color="currentColor" className="text-neutral-500" />
             Deactivate Client
           </button>
           <button
             onClick={() => { setOpen(false); onDelete() }}
             className="flex w-full items-center gap-3 px-4 py-3.5 text-[14px] font-normal text-danger-600 text-left"
           >
-            <Delete01Icon size={18} color="currentColor" className="text-danger-600" />
+            <HugeiconsIcon icon={Delete01Icon} size={18} color="currentColor" className="text-danger-600" />
             Delete Client
           </button>
         </div>
@@ -203,7 +204,7 @@ function PaymentCard({ payment, clientId }: { payment: PaymentStatus; clientId: 
         className="flex items-center justify-between rounded-base bg-white border border-neutral-200 p-4 w-full text-left"
       >
         <span className="text-[13px] font-normal text-neutral-400">No payment records</span>
-        <ArrowRight01Icon size={16} color="currentColor" className="text-neutral-400" />
+        <HugeiconsIcon icon={ArrowRight01Icon} size={16} color="currentColor" className="text-neutral-400" />
       </button>
     )
   }
@@ -257,7 +258,7 @@ function PaymentCard({ payment, clientId }: { payment: PaymentStatus; clientId: 
 
         {/* View Payment History link */}
         <div className="flex items-center justify-center gap-1.5">
-          <Clock01Icon size={14} color="currentColor" className="text-neutral-400" />
+          <HugeiconsIcon icon={Clock01Icon} size={14} color="currentColor" className="text-neutral-400" />
           <span className="text-[13px] font-normal text-neutral-400">View Payment History</span>
         </div>
       </div>
@@ -271,7 +272,7 @@ function PaymentCard({ payment, clientId }: { payment: PaymentStatus; clientId: 
 
 function TrendIcon({ direction, invertColor }: { direction: 'up' | 'down' | 'same' | null; invertColor?: boolean }) {
   if (!direction || direction === 'same') {
-    return <MinusSignIcon size={16} color="currentColor" className="text-neutral-400" />
+    return <HugeiconsIcon icon={MinusSignIcon} size={16} color="currentColor" className="text-neutral-400" />
   }
   // For weight/body fat: down = good (green), up = bad (red)
   // For height: up = good (green), down = neutral
@@ -279,9 +280,9 @@ function TrendIcon({ direction, invertColor }: { direction: 'up' | 'down' | 'sam
   const colorClass = isGood ? 'text-success-600' : 'text-danger-600'
 
   if (direction === 'up') {
-    return <ArrowUp01Icon size={16} color="currentColor" className={colorClass} />
+    return <HugeiconsIcon icon={ArrowUp01Icon} size={16} color="currentColor" className={colorClass} />
   }
-  return <ArrowDown01Icon size={16} color="currentColor" className={colorClass} />
+  return <HugeiconsIcon icon={ArrowDown01Icon} size={16} color="currentColor" className={colorClass} />
 }
 
 type Props = {
@@ -326,7 +327,7 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
           onClick={() => router.back()}
           className="flex items-center gap-1.5 self-start"
         >
-          <ArrowLeft01Icon size={18} color="currentColor" className="text-neutral-500" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
           <span className="text-[13px] font-normal text-neutral-500">Back to Clients</span>
         </button>
 
@@ -429,7 +430,7 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[15px] font-medium text-neutral-950">{workout.name}</span>
-                  <ArrowRight01Icon size={18} color="currentColor" className="text-neutral-500" />
+                  <HugeiconsIcon icon={ArrowRight01Icon} size={18} color="currentColor" className="text-neutral-500" />
                 </div>
                 <span className="text-[13px] font-normal text-neutral-500">
                   {workout.exercises.length} exercises

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { ArrowLeft01Icon, PencilEdit01Icon } from 'hugeicons-react'
+import { HugeiconsIcon, ArrowLeft01Icon, PencilEdit01Icon } from '@/components/ui/icon'
 import type { WorkoutDetail } from '@/actions/workouts'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -30,7 +30,7 @@ export function WorkoutDetailView({ workout }: Props) {
 
         {/* Header */}
         <button onClick={() => router.back()} className="flex items-center gap-1.5 self-start">
-          <ArrowLeft01Icon size={18} color="currentColor" className="text-neutral-500" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
           <span className="text-[13px] font-normal text-neutral-500">Back</span>
         </button>
 
@@ -50,7 +50,7 @@ export function WorkoutDetailView({ workout }: Props) {
             onClick={() => router.push(`/workouts/${workout.id}/edit`)}
             className="flex items-center gap-1.5 rounded-base border border-neutral-200 bg-white px-3 py-1.5 text-[13px] font-normal text-neutral-950"
           >
-            <PencilEdit01Icon size={14} color="currentColor" />
+            <HugeiconsIcon icon={PencilEdit01Icon} size={14} color="currentColor" />
             Edit
           </button>
         </div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft01Icon, Search01Icon } from 'hugeicons-react'
+import { HugeiconsIcon, ArrowLeft01Icon, Search01Icon } from '@/components/ui/icon'
 
 type ClientOption = {
   id: string
@@ -27,7 +27,7 @@ export function RecordProgressSelectClient({ clients }: Props) {
       <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
 
         <button onClick={() => router.back()} className="flex items-center gap-1.5 self-start">
-          <ArrowLeft01Icon size={18} color="currentColor" className="text-neutral-500" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
           <span className="text-[13px] font-normal text-neutral-500">Back</span>
         </button>
 
@@ -40,7 +40,7 @@ export function RecordProgressSelectClient({ clients }: Props) {
 
         {/* Search */}
         <div className="relative">
-          <Search01Icon size={16} color="currentColor" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+          <HugeiconsIcon icon={Search01Icon} size={16} color="currentColor" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
             placeholder="Search clients..."

@@ -3,12 +3,13 @@
 import { useState, useMemo, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  HugeiconsIcon,
   ArrowLeft01Icon,
   Search01Icon,
   PencilEdit01Icon,
   Delete01Icon,
   Cancel01Icon,
-} from 'hugeicons-react'
+} from '@/components/ui/icon'
 import {
   BottomDrawer,
   BottomDrawerContent,
@@ -72,7 +73,7 @@ function AddExerciseDrawer({
           <div className="flex items-center justify-between">
             <span className="text-xl font-medium text-neutral-950">Add New Exercise</span>
             <button onClick={handleClose} className="text-neutral-400 hover:text-neutral-600">
-              <Cancel01Icon size={24} color="currentColor" />
+              <HugeiconsIcon icon={Cancel01Icon} size={24} color="currentColor" />
             </button>
           </div>
 
@@ -202,7 +203,7 @@ export function ExerciseLibraryView({ exercises }: Props) {
         {/* Header */}
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()}>
-            <ArrowLeft01Icon size={20} color="currentColor" className="text-neutral-950" />
+            <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="currentColor" className="text-neutral-950" />
           </button>
           <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px]">
             Exercise Library
@@ -211,7 +212,7 @@ export function ExerciseLibraryView({ exercises }: Props) {
 
         {/* Search */}
         <div className="relative">
-          <Search01Icon size={18} color="currentColor" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+          <HugeiconsIcon icon={Search01Icon} size={18} color="currentColor" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
             placeholder="Search exercises..."
@@ -266,14 +267,14 @@ export function ExerciseLibraryView({ exercises }: Props) {
                 </div>
                 <div className="flex items-center gap-3">
                   <button className="text-neutral-400">
-                    <PencilEdit01Icon size={18} color="currentColor" />
+                    <HugeiconsIcon icon={PencilEdit01Icon} size={18} color="currentColor" />
                   </button>
                   <button
                     onClick={() => handleDelete(ex.id)}
                     disabled={isPending}
                     className="text-danger-600"
                   >
-                    <Delete01Icon size={18} color="currentColor" />
+                    <HugeiconsIcon icon={Delete01Icon} size={18} color="currentColor" />
                   </button>
                 </div>
               </div>

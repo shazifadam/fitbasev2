@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { Calendar01Icon, DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from 'hugeicons-react'
+import { HugeiconsIcon, Calendar01Icon, DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from '@/components/ui/icon'
 import { undoAttendance } from '@/actions/session'
 import { Spinner } from '@/components/ui/spinner'
 import type { AttendanceWithClient } from '@/actions/dashboard'
@@ -93,7 +93,7 @@ function AttendedCard({ item }: { item: AttendanceWithClient }) {
           onClick={() => setShowMenu(prev => !prev)}
           className="p-1"
         >
-          <CheckmarkCircle01Icon size={20} color="currentColor" className="text-success-600 shrink-0" />
+          <HugeiconsIcon icon={CheckmarkCircle01Icon} size={20} color="currentColor" className="text-success-600 shrink-0" />
         </button>
         {showMenu && (
           <div className="absolute right-0 top-full mt-1 z-10 rounded-base border border-neutral-200 bg-white shadow-lg">
@@ -185,7 +185,7 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
           <span className="text-[15px] font-medium text-neutral-950">
             {formatDateLabel(date)}
           </span>
-          <Calendar01Icon size={20} color="currentColor" className="text-neutral-400 shrink-0" />
+          <HugeiconsIcon icon={Calendar01Icon} size={20} color="currentColor" className="text-neutral-400 shrink-0" />
           <input
             type="date"
             value={date}
@@ -227,7 +227,7 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
                     {formatPrograms(item.clients?.training_programs)}
                   </span>
                 </div>
-                <DragDropVerticalIcon size={18} color="currentColor" className="text-neutral-300 shrink-0" />
+                <HugeiconsIcon icon={DragDropVerticalIcon} size={18} color="currentColor" className="text-neutral-300 shrink-0" />
               </button>
             ))}
           </div>
@@ -260,7 +260,7 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
                     {formatPrograms(item.clients?.training_programs)}
                   </span>
                 </div>
-                <CancelCircleIcon size={20} color="currentColor" className="text-danger-600 shrink-0" />
+                <HugeiconsIcon icon={CancelCircleIcon} size={20} color="currentColor" className="text-danger-600 shrink-0" />
               </div>
             ))}
           </div>

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowDown01Icon, ArrowLeft01Icon } from 'hugeicons-react'
+import { HugeiconsIcon, ArrowDown01Icon, ArrowLeft01Icon } from '@/components/ui/icon'
 import { Spinner } from '@/components/ui/spinner'
 import { updateClient, type ClientDetail, type TierRow } from '@/actions/clients'
 
@@ -113,7 +113,7 @@ export function EditClientForm({ client, tiers }: Props) {
         {/* Header */}
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className="text-neutral-950" aria-label="Go back">
-            <ArrowLeft01Icon size={24} color="currentColor" />
+            <HugeiconsIcon icon={ArrowLeft01Icon} size={24} color="currentColor" />
           </button>
           <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px]">
             Edit Client
@@ -187,7 +187,7 @@ export function EditClientForm({ client, tiers }: Props) {
                   <option key={tier.id} value={tier.id}>{tier.name}</option>
                 ))}
               </select>
-              <ArrowDown01Icon size={18} color="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+              <HugeiconsIcon icon={ArrowDown01Icon} size={18} color="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
             </div>
           </div>
 

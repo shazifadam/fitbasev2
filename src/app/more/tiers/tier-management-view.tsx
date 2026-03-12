@@ -3,12 +3,13 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  HugeiconsIcon,
   ArrowLeft01Icon,
   PencilEdit01Icon,
   Delete01Icon,
   Add01Icon,
   Cancel01Icon,
-} from 'hugeicons-react'
+} from '@/components/ui/icon'
 import {
   BottomDrawer,
   BottomDrawerContent,
@@ -72,7 +73,7 @@ function TierDrawer({
               {isEdit ? 'Edit Tier' : 'Create New Tier'}
             </span>
             <button onClick={handleClose} className="text-neutral-400">
-              <Cancel01Icon size={24} color="currentColor" />
+              <HugeiconsIcon icon={Cancel01Icon} size={24} color="currentColor" />
             </button>
           </div>
 
@@ -169,7 +170,7 @@ export function TierManagementView({ tiers }: Props) {
 
         {/* Header */}
         <button onClick={() => router.back()} className="flex items-center gap-1.5 self-start">
-          <ArrowLeft01Icon size={18} color="currentColor" className="text-neutral-500" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
           <span className="text-[13px] font-normal text-neutral-500">Back</span>
         </button>
 
@@ -207,10 +208,10 @@ export function TierManagementView({ tiers }: Props) {
                 </div>
                 <div className="flex items-center gap-3">
                   <button onClick={() => handleEdit(tier)} className="text-neutral-400">
-                    <PencilEdit01Icon size={18} color="currentColor" />
+                    <HugeiconsIcon icon={PencilEdit01Icon} size={18} color="currentColor" />
                   </button>
                   <button onClick={() => handleDelete(tier)} className="text-danger-600" disabled={isPending}>
-                    <Delete01Icon size={18} color="currentColor" />
+                    <HugeiconsIcon icon={Delete01Icon} size={18} color="currentColor" />
                   </button>
                 </div>
               </div>
@@ -223,7 +224,7 @@ export function TierManagementView({ tiers }: Props) {
           onClick={handleCreate}
           className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white"
         >
-          <Add01Icon size={18} color="currentColor" />
+          <HugeiconsIcon icon={Add01Icon} size={18} color="currentColor" />
           Add New Tier
         </button>
 

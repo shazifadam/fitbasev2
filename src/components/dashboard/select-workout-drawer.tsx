@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
-import { Cancel01Icon, PlayIcon, Tick01Icon } from 'hugeicons-react'
+import { HugeiconsIcon, Cancel01Icon, PlayIcon, Tick01Icon } from '@/components/ui/icon'
 import {
   BottomDrawer,
   BottomDrawerContent,
@@ -51,7 +51,7 @@ export function SelectWorkoutDrawer({ open, attendance, onClose }: Props) {
           <div className="flex items-center justify-between">
             <span className="text-xl font-medium text-neutral-950">Select Workout</span>
             <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
-              <Cancel01Icon size={24} color="currentColor" />
+              <HugeiconsIcon icon={Cancel01Icon} size={24} color="currentColor" />
             </button>
           </div>
 
@@ -98,7 +98,7 @@ export function SelectWorkoutDrawer({ open, attendance, onClose }: Props) {
                   </div>
                   {isSelected && (
                     <div className="relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-800">
-                      <Tick01Icon size={14} color="white" />
+                      <HugeiconsIcon icon={Tick01Icon} size={14} color="white" />
                     </div>
                   )}
                 </button>
@@ -114,7 +114,7 @@ export function SelectWorkoutDrawer({ open, attendance, onClose }: Props) {
             disabled={isPending}
             className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
           >
-            {isPending ? <Spinner className="text-white" /> : <PlayIcon size={16} color="white" />}
+            {isPending ? <Spinner className="text-white" /> : <HugeiconsIcon icon={PlayIcon} size={16} color="white" />}
             {isPending ? 'Starting…' : 'Start Session'}
           </button>
 

@@ -3,13 +3,14 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  HugeiconsIcon,
   ArrowLeft01Icon,
   ArrowRight01Icon,
   FilterIcon,
   Download04Icon,
   Cancel01Icon,
   Calendar01Icon,
-} from 'hugeicons-react'
+} from '@/components/ui/icon'
 import {
   BottomDrawer,
   BottomDrawerContent,
@@ -211,7 +212,7 @@ function ExportDrawer({
           <div className="flex items-center justify-between">
             <span className="text-xl font-medium text-neutral-950">Export Attendance</span>
             <button onClick={onClose} className="text-neutral-400">
-              <Cancel01Icon size={24} color="currentColor" />
+              <HugeiconsIcon icon={Cancel01Icon} size={24} color="currentColor" />
             </button>
           </div>
 
@@ -220,7 +221,7 @@ function ExportDrawer({
             <span className="text-[14px] font-medium text-neutral-950">Date Range</span>
             <div className="flex items-center gap-3">
               <label className="flex flex-1 items-center gap-2 h-11 rounded-base border border-neutral-200 px-3 bg-white">
-                <Calendar01Icon size={16} color="currentColor" className="text-neutral-400 shrink-0" />
+                <HugeiconsIcon icon={Calendar01Icon} size={16} color="currentColor" className="text-neutral-400 shrink-0" />
                 <input
                   type="date"
                   value={fromDate}
@@ -230,7 +231,7 @@ function ExportDrawer({
               </label>
               <span className="text-[13px] font-normal text-neutral-400">to</span>
               <label className="flex flex-1 items-center gap-2 h-11 rounded-base border border-neutral-200 px-3 bg-white">
-                <Calendar01Icon size={16} color="currentColor" className="text-neutral-400 shrink-0" />
+                <HugeiconsIcon icon={Calendar01Icon} size={16} color="currentColor" className="text-neutral-400 shrink-0" />
                 <input
                   type="date"
                   value={toDate}
@@ -272,7 +273,7 @@ function ExportDrawer({
             onClick={handleExport}
             className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white"
           >
-            <Download04Icon size={18} color="currentColor" />
+            <HugeiconsIcon icon={Download04Icon} size={18} color="currentColor" />
             Export
           </button>
 
@@ -355,7 +356,7 @@ export function AttendanceDetailView({ client, attendance, year, month }: Props)
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => router.back()}>
-              <ArrowLeft01Icon size={20} color="currentColor" className="text-neutral-950" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="currentColor" className="text-neutral-950" />
             </button>
             <div className="flex flex-col">
               <span className="text-[12px] font-normal text-neutral-500">Back to Client</span>
@@ -369,13 +370,13 @@ export function AttendanceDetailView({ client, attendance, year, month }: Props)
                 showFilter || filterActive ? 'border-neutral-800 bg-neutral-800' : 'border-neutral-200 bg-white'
               }`}
             >
-              <FilterIcon size={18} color="currentColor" className={showFilter || filterActive ? 'text-white' : 'text-neutral-600'} />
+              <HugeiconsIcon icon={FilterIcon} size={18} color="currentColor" className={showFilter || filterActive ? 'text-white' : 'text-neutral-600'} />
             </button>
             <button
               onClick={() => setShowExport(true)}
               className="flex h-9 w-9 items-center justify-center rounded-base border border-neutral-200 bg-white"
             >
-              <Download04Icon size={18} color="currentColor" className="text-neutral-600" />
+              <HugeiconsIcon icon={Download04Icon} size={18} color="currentColor" className="text-neutral-600" />
             </button>
           </div>
         </div>
@@ -384,12 +385,12 @@ export function AttendanceDetailView({ client, attendance, year, month }: Props)
         {filterActive && (
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 rounded-base bg-neutral-800 px-3 py-1.5">
-              <FilterIcon size={14} color="currentColor" className="text-white" />
+              <HugeiconsIcon icon={FilterIcon} size={14} color="currentColor" className="text-white" />
               <span className="text-[13px] font-normal text-white">
                 {formatInputDate(fromDate)} – {formatInputDate(toDate)}
               </span>
               <button onClick={handleClearFilter}>
-                <Cancel01Icon size={14} color="currentColor" className="text-white/70" />
+                <HugeiconsIcon icon={Cancel01Icon} size={14} color="currentColor" className="text-white/70" />
               </button>
             </div>
           </div>
@@ -401,7 +402,7 @@ export function AttendanceDetailView({ client, attendance, year, month }: Props)
             <span className="text-[14px] font-medium text-neutral-950">Date Range</span>
             <div className="flex items-center gap-3">
               <label className="flex flex-1 items-center gap-2 h-11 rounded-base border border-neutral-200 px-3 bg-white">
-                <Calendar01Icon size={16} color="currentColor" className="text-neutral-400 shrink-0" />
+                <HugeiconsIcon icon={Calendar01Icon} size={16} color="currentColor" className="text-neutral-400 shrink-0" />
                 <input
                   type="date"
                   value={fromDate}
@@ -411,7 +412,7 @@ export function AttendanceDetailView({ client, attendance, year, month }: Props)
               </label>
               <span className="text-[13px] font-normal text-neutral-400">to</span>
               <label className="flex flex-1 items-center gap-2 h-11 rounded-base border border-neutral-200 px-3 bg-white">
-                <Calendar01Icon size={16} color="currentColor" className="text-neutral-400 shrink-0" />
+                <HugeiconsIcon icon={Calendar01Icon} size={16} color="currentColor" className="text-neutral-400 shrink-0" />
                 <input
                   type="date"
                   value={toDate}
@@ -433,13 +434,13 @@ export function AttendanceDetailView({ client, attendance, year, month }: Props)
         {!filterActive && (
           <div className="flex items-center justify-between">
             <button onClick={handlePrevMonth} className="p-1">
-              <ArrowLeft01Icon size={18} color="currentColor" className="text-neutral-600" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-600" />
             </button>
             <span className="text-base font-medium text-neutral-950">
               {MONTH_NAMES[month - 1]} {year}
             </span>
             <button onClick={handleNextMonth} className="p-1">
-              <ArrowRight01Icon size={18} color="currentColor" className="text-neutral-600" />
+              <HugeiconsIcon icon={ArrowRight01Icon} size={18} color="currentColor" className="text-neutral-600" />
             </button>
           </div>
         )}

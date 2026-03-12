@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
+  HugeiconsIcon,
   Home01Icon,
   UserGroupIcon,
   BarChartIcon,
@@ -14,7 +15,7 @@ import {
   Money01Icon,
   ChartLineData01Icon,
   UserAdd01Icon,
-} from 'hugeicons-react'
+} from '@/components/ui/icon'
 import { cn } from '@/lib/utils'
 
 // ─── Bottom Navigation ────────────────────────────────────────────────────
@@ -76,7 +77,6 @@ export function BottomNav() {
             >
               <div className="rounded-base border border-neutral-200 bg-white shadow-lg overflow-hidden py-1">
                 {fabMenuItems.map((item, i) => {
-                  const Icon = item.icon
                   return (
                     <div key={item.href}>
                       {i > 0 && <div className="mx-4 h-px bg-neutral-100" />}
@@ -84,7 +84,7 @@ export function BottomNav() {
                         onClick={() => handleMenuItemClick(item.href)}
                         className="flex w-full items-center gap-2.5 px-4 py-3.5 text-left"
                       >
-                        <Icon size={18} color="currentColor" className="text-neutral-500" />
+                        <HugeiconsIcon icon={item.icon} size={18} color="currentColor" className="text-neutral-500" />
                         <span className="text-[14px] font-normal text-neutral-950">{item.label}</span>
                       </button>
                     </div>
@@ -101,7 +101,6 @@ export function BottomNav() {
         <div className="flex items-center justify-around px-2 pt-2 pb-2">
           {navItems.map((item, index) => {
             const isActive = pathname.startsWith(item.href)
-            const Icon = item.icon
 
             // Insert FAB in the center (between index 1 and 2)
             const showFab = index === 2
@@ -128,7 +127,7 @@ export function BottomNav() {
                           exit={{ rotate: 90, opacity: 0 }}
                           transition={{ duration: 0.15 }}
                         >
-                          <Cancel01Icon size={24} color="white" />
+                          <HugeiconsIcon icon={Cancel01Icon} size={24} color="white" />
                         </motion.div>
                       ) : (
                         <motion.div
@@ -138,7 +137,7 @@ export function BottomNav() {
                           exit={{ rotate: -90, opacity: 0 }}
                           transition={{ duration: 0.15 }}
                         >
-                          <Add01Icon size={24} color="white" />
+                          <HugeiconsIcon icon={Add01Icon} size={24} color="white" />
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -148,7 +147,8 @@ export function BottomNav() {
                   href={item.href}
                   className="flex flex-col items-center gap-1 min-w-[52px] py-1"
                 >
-                  <Icon
+                  <HugeiconsIcon
+                    icon={item.icon}
                     size={24}
                     color="currentColor"
                     className={cn(

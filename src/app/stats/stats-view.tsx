@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { ArrowLeft02Icon, ArrowRight02Icon, ArrowUp01Icon, ArrowDown01Icon } from 'hugeicons-react'
+import { HugeiconsIcon, ArrowLeft02Icon, ArrowRight02Icon, ArrowUp01Icon, ArrowDown01Icon } from '@/components/ui/icon'
 import type { MonthlyStats } from '@/actions/stats'
 
 const MONTH_NAMES = [
@@ -57,13 +57,13 @@ export function StatsView({ stats, year, month, trainerName }: Props) {
         {/* Month Selector */}
         <div className="flex items-center justify-between rounded-card border border-neutral-200 bg-white px-4 py-3">
           <button onClick={() => navigateMonth(-1)} className="p-1">
-            <ArrowLeft02Icon size={20} color="currentColor" className="text-neutral-600" />
+            <HugeiconsIcon icon={ArrowLeft02Icon} size={20} color="currentColor" className="text-neutral-600" />
           </button>
           <span className="text-sm font-medium text-neutral-900">
             {MONTH_NAMES[month - 1]} {year}
           </span>
           <button onClick={() => navigateMonth(1)} className="p-1">
-            <ArrowRight02Icon size={20} color="currentColor" className="text-neutral-600" />
+            <HugeiconsIcon icon={ArrowRight02Icon} size={20} color="currentColor" className="text-neutral-600" />
           </button>
         </div>
 
@@ -77,9 +77,9 @@ export function StatsView({ stats, year, month, trainerName }: Props) {
             {incomeChange !== 0 && (
               <span className="flex items-center gap-1 rounded-base bg-white/20 px-2 py-0.5 text-xs text-white">
                 {incomeChange > 0 ? (
-                  <ArrowUp01Icon size={12} color="currentColor" />
+                  <HugeiconsIcon icon={ArrowUp01Icon} size={12} color="currentColor" />
                 ) : (
-                  <ArrowDown01Icon size={12} color="currentColor" />
+                  <HugeiconsIcon icon={ArrowDown01Icon} size={12} color="currentColor" />
                 )}
                 {incomeChange > 0 ? '+' : ''}{incomeChange}%
               </span>

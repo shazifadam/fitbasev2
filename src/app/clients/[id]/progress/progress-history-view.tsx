@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  HugeiconsIcon,
   ArrowLeft01Icon,
   ArrowDown01Icon,
   ArrowUp01Icon,
   MinusSignIcon,
-} from 'hugeicons-react'
+} from '@/components/ui/icon'
 import type { ProgressHistoryData, ProgressRow } from '@/actions/progress'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -175,17 +176,17 @@ function ProgressChart({
 
 function TrendIcon({ current, previous, metric }: { current: number; previous: number | null; metric: MetricTab }) {
   if (previous == null) {
-    return <MinusSignIcon size={16} color="currentColor" className="text-neutral-400" />
+    return <HugeiconsIcon icon={MinusSignIcon} size={16} color="currentColor" className="text-neutral-400" />
   }
   const diff = current - previous
   // For weight and body fat, decrease is good. For height, increase is neutral.
   if (Math.abs(diff) < 0.01) {
-    return <MinusSignIcon size={16} color="currentColor" className="text-neutral-400" />
+    return <HugeiconsIcon icon={MinusSignIcon} size={16} color="currentColor" className="text-neutral-400" />
   }
   if (diff < 0) {
-    return <ArrowDown01Icon size={16} color="currentColor" className="text-success-600" />
+    return <HugeiconsIcon icon={ArrowDown01Icon} size={16} color="currentColor" className="text-success-600" />
   }
-  return <ArrowUp01Icon size={16} color="currentColor" className={metric === 'height' ? 'text-success-600' : 'text-danger-600'} />
+  return <HugeiconsIcon icon={ArrowUp01Icon} size={16} color="currentColor" className={metric === 'height' ? 'text-success-600' : 'text-danger-600'} />
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -216,7 +217,7 @@ export function ProgressHistoryView({ data }: Props) {
       {/* Header */}
       <div className="flex items-center gap-3 h-12 px-5 pt-14">
         <button onClick={() => router.back()}>
-          <ArrowLeft01Icon size={24} color="currentColor" className="text-neutral-950" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={24} color="currentColor" className="text-neutral-950" />
         </button>
         <span className="text-[18px] font-medium text-neutral-950">Progress History</span>
       </div>

@@ -3,12 +3,13 @@
 import { useState, useMemo, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  HugeiconsIcon,
   ArrowLeft01Icon,
   Search01Icon,
   Cancel01Icon,
   Delete01Icon,
   Add01Icon,
-} from 'hugeicons-react'
+} from '@/components/ui/icon'
 import {
   BottomDrawer,
   BottomDrawerContent,
@@ -92,12 +93,12 @@ function SearchExercisesSheet({
           <div className="flex items-center justify-between">
             <span className="text-xl font-medium text-neutral-950">Search Exercises</span>
             <button onClick={handleClose} className="text-neutral-400">
-              <Cancel01Icon size={24} color="currentColor" />
+              <HugeiconsIcon icon={Cancel01Icon} size={24} color="currentColor" />
             </button>
           </div>
 
           <div className="relative">
-            <Search01Icon size={16} color="currentColor" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+            <HugeiconsIcon icon={Search01Icon} size={16} color="currentColor" className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
             <input
               type="text"
               placeholder="Search exercises..."
@@ -216,7 +217,7 @@ function SetGrid({
             className="h-10 rounded-base border border-neutral-200 px-2 text-center text-[14px] font-normal text-neutral-950 bg-white outline-none focus:border-neutral-800"
           />
           <button onClick={() => removeSet(i)} className="text-neutral-400">
-            <Cancel01Icon size={16} color="currentColor" />
+            <HugeiconsIcon icon={Cancel01Icon} size={16} color="currentColor" />
           </button>
         </div>
       ))}
@@ -311,7 +312,7 @@ export function EditWorkoutView({ workout, exercises }: Props) {
       <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
 
         <button onClick={() => router.back()} className="flex items-center gap-1.5 self-start">
-          <ArrowLeft01Icon size={18} color="currentColor" className="text-neutral-500" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
           <span className="text-[13px] font-normal text-neutral-500">Back</span>
         </button>
 
@@ -346,7 +347,7 @@ export function EditWorkoutView({ workout, exercises }: Props) {
           onClick={() => setShowSearch(true)}
           className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white"
         >
-          <Add01Icon size={18} color="currentColor" />
+          <HugeiconsIcon icon={Add01Icon} size={18} color="currentColor" />
           Add Exercise
         </button>
 
@@ -361,7 +362,7 @@ export function EditWorkoutView({ workout, exercises }: Props) {
                 )}
               </div>
               <button onClick={() => handleRemoveExercise(idx)} className="text-danger-600">
-                <Delete01Icon size={18} color="currentColor" />
+                <HugeiconsIcon icon={Delete01Icon} size={18} color="currentColor" />
               </button>
             </div>
             <SetGrid

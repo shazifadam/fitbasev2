@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft01Icon, Add01Icon } from 'hugeicons-react'
+import { HugeiconsIcon, ArrowLeft01Icon, Add01Icon } from '@/components/ui/icon'
 import { RecordPaymentDrawer } from '@/components/payments/record-payment-drawer'
 import type { PaymentHistoryData } from '@/actions/payments'
 
@@ -43,7 +43,7 @@ export function PaymentHistoryView({ data }: Props) {
 
         {/* Header */}
         <button onClick={() => router.back()} className="flex items-center gap-1.5 self-start">
-          <ArrowLeft01Icon size={18} color="currentColor" className="text-neutral-500" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
           <span className="text-[13px] font-normal text-neutral-500">Back</span>
         </button>
 
@@ -142,7 +142,7 @@ export function PaymentHistoryView({ data }: Props) {
           onClick={() => setShowRecordDrawer(true)}
           className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white"
         >
-          <Add01Icon size={18} color="currentColor" />
+          <HugeiconsIcon icon={Add01Icon} size={18} color="currentColor" />
           Record Payment
         </button>
       </div>

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft01Icon } from 'hugeicons-react'
+import { HugeiconsIcon, ArrowLeft01Icon } from '@/components/ui/icon'
 import { Spinner } from '@/components/ui/spinner'
 import { updateTrainerProfile } from '@/actions/profile'
 import type { TrainerProfileDetail } from '@/actions/profile'
@@ -52,7 +52,7 @@ export function ProfileEditView({ profile }: Props) {
 
         {/* Header */}
         <button onClick={() => router.back()} className="flex items-center gap-1.5 self-start">
-          <ArrowLeft01Icon size={18} color="currentColor" className="text-neutral-500" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
           <span className="text-[13px] font-normal text-neutral-500">Back</span>
         </button>
 
