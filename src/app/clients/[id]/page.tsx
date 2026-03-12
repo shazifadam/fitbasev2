@@ -1,6 +1,11 @@
 import { redirect, notFound } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
-import { getClientDetail, getClientAttendance } from '@/actions/clients'
+import {
+  getClientDetail,
+  getClientAttendance,
+  getClientPaymentStatus,
+  getClientWorkouts,
+} from '@/actions/clients'
 import { ClientDetailView } from './client-detail-view'
 import { BottomNav } from '@/components/layout/bottom-nav'
 
@@ -15,16 +20,23 @@ export default async function ClientDetailPage({
 
   const { id } = await params
 
-  const [client, attendance] = await Promise.all([
+  const [client, attendance, payment, workouts] = await Promise.all([
     getClientDetail(id),
     getClientAttendance(id),
+    getClientPaymentStatus(id),
+    getClientWorkouts(id),
   ])
 
   if (!client) notFound()
 
   return (
     <>
-      <ClientDetailView client={client} attendance={attendance} />
+      <ClientDetailView
+        client={client}
+        attendance={attendance}
+        payment={payment}
+        workouts={workouts}
+      />
       <BottomNav />
     </>
   )

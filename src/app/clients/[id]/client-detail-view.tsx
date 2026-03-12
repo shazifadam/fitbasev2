@@ -3,13 +3,16 @@
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft01Icon,
-  CallIcon,
-  Calendar01Icon,
-  CheckmarkCircle01Icon,
-  CancelCircleIcon,
-  Clock01Icon,
+  MoreVerticalIcon,
+  ArrowDown01Icon,
+  ArrowRight01Icon,
 } from 'hugeicons-react'
-import type { ClientDetail, AttendanceHistoryRow } from '@/actions/clients'
+import type {
+  ClientDetail,
+  AttendanceHistoryRow,
+  PaymentStatus,
+  ClientWorkout,
+} from '@/actions/clients'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -19,40 +22,82 @@ const SCHEDULE_LABELS: Record<string, string> = {
   custom: 'Custom',
 }
 
-const SCHEDULE_DAYS: Record<string, string[]> = {
-  sunday: ['Sun', 'Tue', 'Thu'],
-  saturday: ['Sat', 'Mon', 'Wed'],
-}
-
-function formatDate(dateStr: string): string {
-  const [y, m, d] = dateStr.split('-').map(Number)
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  })
-}
-
 function formatPrograms(programs: string[] | null): string {
   if (!programs || programs.length === 0) return 'No programs'
   return programs.join(' · ')
 }
 
-function statusIcon(status: string | null) {
-  if (status === 'attended')
-    return <CheckmarkCircle01Icon size={16} color="currentColor" className="text-success-600" />
-  if (status === 'missed')
-    return <CancelCircleIcon size={16} color="currentColor" className="text-danger-600" />
-  if (status === 'attending')
-    return <Clock01Icon size={16} color="currentColor" className="text-warning-500" />
-  return <Clock01Icon size={16} color="currentColor" className="text-neutral-400" />
+function lastSessionAgo(attendance: AttendanceHistoryRow[]): string {
+  const last = attendance.find(r => r.status === 'attended')
+  if (!last) return 'No sessions yet'
+  const [y, m, d] = last.scheduled_date.split('-').map(Number)
+  const sessionDate = new Date(y, m - 1, d)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const diffDays = Math.floor((today.getTime() - sessionDate.getTime()) / 86400000)
+  if (diffDays === 0) return 'Last session: today'
+  if (diffDays === 1) return 'Last session: yesterday'
+  return `Last session: ${diffDays} days ago`
 }
 
-function statusLabel(status: string | null): string {
-  if (status === 'attended') return 'Attended'
-  if (status === 'missed') return 'Absent'
-  if (status === 'attending') return 'In Session'
-  if (status === 'rescheduled') return 'Rescheduled'
-  return 'Scheduled'
+function formatPaymentDate(dateStr: string | null): string {
+  if (!dateStr) return ''
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const date = new Date(y, m - 1, d)
+  return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+}
+
+// ─── Attendance Dot Grid ─────────────────────────────────────────────────────
+
+function AttendanceDotGrid({ attendance }: { attendance: AttendanceHistoryRow[] }) {
+  const recent = attendance.slice(0, 14).reverse()
+  const row1 = recent.slice(0, 7)
+  const row2 = recent.slice(7, 14)
+
+  function dotColor(status: string | null): string {
+    if (status === 'attended') return 'bg-success-600'
+    if (status === 'missed') return 'bg-danger-600'
+    return 'bg-neutral-300'
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded-base bg-white border border-neutral-200 p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-base font-medium text-neutral-950">Last 2 Weeks Attendance</span>
+        <span className="text-[13px] font-medium text-neutral-950">View Full</span>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex justify-center gap-2">
+          {row1.map((r, i) => (
+            <div key={i} className={`h-3.5 w-3.5 rounded-full ${dotColor(r.status)}`} />
+          ))}
+          {Array.from({ length: Math.max(0, 7 - row1.length) }).map((_, i) => (
+            <div key={`p1-${i}`} className="h-3.5 w-3.5 rounded-full bg-neutral-200" />
+          ))}
+        </div>
+        <div className="flex justify-center gap-2">
+          {row2.map((r, i) => (
+            <div key={i} className={`h-3.5 w-3.5 rounded-full ${dotColor(r.status)}`} />
+          ))}
+          {Array.from({ length: Math.max(0, 7 - row2.length) }).map((_, i) => (
+            <div key={`p2-${i}`} className="h-3.5 w-3.5 rounded-full bg-neutral-200" />
+          ))}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-full bg-success-600" />
+          <span className="text-[12px] font-normal text-neutral-500">Attended</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-full bg-danger-600" />
+          <span className="text-[12px] font-normal text-neutral-500">Missed</span>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -60,159 +105,160 @@ function statusLabel(status: string | null): string {
 type Props = {
   client: ClientDetail
   attendance: AttendanceHistoryRow[]
+  payment: PaymentStatus
+  workouts: ClientWorkout[]
 }
 
-export function ClientDetailView({ client, attendance }: Props) {
+export function ClientDetailView({ client, attendance, payment, workouts }: Props) {
   const router = useRouter()
-
-  const days =
-    client.schedule_set === 'custom'
-      ? client.custom_days ?? []
-      : SCHEDULE_DAYS[client.schedule_set] ?? []
-
-  const sessionTimes = (client.session_times ?? {}) as Record<string, string>
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">
       <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
 
-        {/* Header with back */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="flex h-10 w-10 items-center justify-center rounded-base bg-white border border-neutral-200"
-          >
-            <ArrowLeft01Icon size={20} color="currentColor" className="text-neutral-950" />
-          </button>
-          <h1 className="text-[22px] font-medium text-neutral-950 leading-tight">
+        {/* Back link */}
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-1.5 self-start"
+        >
+          <ArrowLeft01Icon size={18} color="currentColor" className="text-neutral-500" />
+          <span className="text-[13px] font-normal text-neutral-500">Back to Clients</span>
+        </button>
+
+        {/* Name + menu */}
+        <div className="flex items-center justify-between -mt-2">
+          <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px]">
             {client.name}
           </h1>
+          <MoreVerticalIcon size={22} color="currentColor" className="text-neutral-500" />
         </div>
 
-        {/* Info Card */}
-        <div className="flex flex-col gap-4 rounded-card bg-white border border-neutral-200 p-4">
-          {/* Programs */}
-          <div className="flex flex-col gap-1">
-            <span className="text-[11px] font-normal text-neutral-400 uppercase tracking-wider">Programs</span>
-            <span className="text-[15px] font-normal text-neutral-950">
-              {formatPrograms(client.training_programs)}
-            </span>
-          </div>
+        {/* Programs */}
+        <span className="text-[14px] font-normal text-neutral-500 -mt-3">
+          {formatPrograms(client.training_programs)}
+        </span>
 
-          {/* Phone */}
-          <div className="flex items-center gap-2">
-            <CallIcon size={16} color="currentColor" className="text-neutral-400" />
-            <span className="text-[15px] font-normal text-neutral-950">{client.phone}</span>
-          </div>
+        {/* Meta row: badge + last session */}
+        <div className="flex items-center gap-3 -mt-2">
+          <span className="rounded-base bg-neutral-200 px-2 py-1 text-[12px] font-medium text-neutral-950">
+            {SCHEDULE_LABELS[client.schedule_set] ?? client.schedule_set}
+          </span>
+          <span className="text-[13px] font-normal text-neutral-500">
+            {lastSessionAgo(attendance)}
+          </span>
+        </div>
 
-          {/* Tier */}
-          {client.tiers && (
+        {/* Payment Status Card */}
+        {payment.lastPaymentDate ? (
+          <div className={`flex items-center justify-between rounded-base p-4 ${
+            payment.isOverdue ? 'bg-amber-50' : 'bg-green-50'
+          }`}>
             <div className="flex flex-col gap-1">
-              <span className="text-[11px] font-normal text-neutral-400 uppercase tracking-wider">Tier</span>
-              <span className="rounded-base bg-neutral-100 px-2 py-1 text-[13px] font-normal text-neutral-600 self-start">
-                {client.tiers.name}
+              <span className={`text-[12px] font-medium ${
+                payment.isOverdue ? 'text-amber-700' : 'text-green-700'
+              }`}>
+                Payment Status
+              </span>
+              <span className="text-[14px] font-medium text-neutral-950">
+                {payment.isOverdue
+                  ? `Overdue — ${formatPaymentDate(payment.validUntil)}`
+                  : `Paid — Valid until ${formatPaymentDate(payment.validUntil)}`
+                }
               </span>
             </div>
-          )}
-        </div>
-
-        {/* Schedule Card */}
-        <div className="flex flex-col gap-4 rounded-card bg-white border border-neutral-200 p-4">
-          <div className="flex items-center gap-2">
-            <Calendar01Icon size={16} color="currentColor" className="text-neutral-400" />
-            <span className="text-[14px] font-medium text-neutral-950">
-              Schedule — {SCHEDULE_LABELS[client.schedule_set] ?? client.schedule_set}
+            <span className={`text-base font-medium ${
+              payment.isOverdue ? 'text-amber-700' : 'text-green-700'
+            }`}>
+              {payment.currency} {payment.amount?.toFixed(2)}
             </span>
           </div>
+        ) : (
+          <div className="flex items-center justify-between rounded-base bg-neutral-200/50 p-4">
+            <span className="text-[13px] font-normal text-neutral-400">No payment records</span>
+          </div>
+        )}
 
-          {days.length > 0 ? (
-            <div className="flex flex-col gap-2">
-              {days.map(day => (
-                <div key={day} className="flex items-center justify-between">
-                  <span className="text-[14px] font-normal text-neutral-950">{day}</span>
-                  <span className="text-[13px] font-normal text-neutral-500">
-                    {sessionTimes[day] ?? '—'}
+        {/* Progress Stats */}
+        {(client.current_height || client.current_weight || client.current_fat_percent) && (
+          <div className="flex flex-col gap-3">
+            <span className="text-xl font-medium text-neutral-950">Progress Stats</span>
+            <div className="flex gap-2">
+              {client.current_height != null && (
+                <div className="flex flex-1 flex-col gap-1 rounded-base bg-white border border-neutral-200 p-4">
+                  <span className="text-[28px] font-medium text-neutral-950 leading-none">
+                    {client.current_height}
                   </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <span className="text-[13px] font-normal text-neutral-400">No days configured</span>
-          )}
-        </div>
-
-        {/* Body Metrics (if any) */}
-        {(client.current_weight || client.current_height) && (
-          <div className="flex flex-col gap-3 rounded-card bg-white border border-neutral-200 p-4">
-            <span className="text-[11px] font-normal text-neutral-400 uppercase tracking-wider">Body Metrics</span>
-            <div className="grid grid-cols-2 gap-3">
-              {client.current_weight && (
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[12px] font-normal text-neutral-400">Weight</span>
-                  <span className="text-[15px] font-normal text-neutral-950">{client.current_weight} kg</span>
+                  <span className="text-[12px] font-normal text-neutral-500">cm</span>
+                  <span className="text-[12px] font-medium text-neutral-500">Height</span>
                 </div>
               )}
-              {client.current_height && (
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[12px] font-normal text-neutral-400">Height</span>
-                  <span className="text-[15px] font-normal text-neutral-950">{client.current_height} cm</span>
+              {client.current_weight != null && (
+                <div className="flex flex-1 flex-col gap-1 rounded-base bg-white border border-neutral-200 p-4">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[28px] font-medium text-neutral-950 leading-none">
+                      {client.current_weight}
+                    </span>
+                    <ArrowDown01Icon size={16} color="currentColor" className="text-success-600" />
+                  </div>
+                  <span className="text-[12px] font-normal text-neutral-500">kg</span>
+                  <span className="text-[12px] font-medium text-neutral-500">Weight</span>
                 </div>
               )}
-              {client.current_fat_percent && (
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[12px] font-normal text-neutral-400">Body Fat</span>
-                  <span className="text-[15px] font-normal text-neutral-950">{client.current_fat_percent}%</span>
-                </div>
-              )}
-              {client.current_waist && (
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[12px] font-normal text-neutral-400">Waist</span>
-                  <span className="text-[15px] font-normal text-neutral-950">{client.current_waist} cm</span>
+              {client.current_fat_percent != null && (
+                <div className="flex flex-1 flex-col gap-1 rounded-base bg-white border border-neutral-200 p-4">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[28px] font-medium text-neutral-950 leading-none">
+                      {client.current_fat_percent}
+                    </span>
+                    <ArrowDown01Icon size={16} color="currentColor" className="text-success-600" />
+                  </div>
+                  <span className="text-[12px] font-normal text-neutral-500">%</span>
+                  <span className="text-[12px] font-medium text-neutral-500">Body Fat</span>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* Attendance History */}
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[14px] font-medium text-neutral-950">Attendance History</span>
-            <span className="text-[13px] font-normal text-neutral-500">
-              Last {attendance.length} sessions
-            </span>
-          </div>
+        {/* Attendance Dot Grid */}
+        {attendance.length > 0 && (
+          <AttendanceDotGrid attendance={attendance} />
+        )}
 
-          {attendance.length === 0 ? (
-            <div className="flex items-center justify-center py-8">
-              <span className="text-[14px] font-normal text-neutral-400">No attendance records yet</span>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-1.5">
-              {attendance.map(row => (
-                <div
-                  key={row.id}
-                  className="flex items-center justify-between rounded-base bg-white border border-neutral-200 px-4 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    {statusIcon(row.status)}
-                    <div className="flex flex-col">
-                      <span className="text-[14px] font-normal text-neutral-950">
-                        {formatDate(row.scheduled_date)}
-                      </span>
-                      <span className="text-[12px] font-normal text-neutral-400">
-                        {row.scheduled_time?.slice(0, 5)}
-                      </span>
-                    </div>
-                  </div>
-                  <span className="text-[13px] font-normal text-neutral-500">
-                    {statusLabel(row.status)}
-                  </span>
+        {/* Workout Routine */}
+        {workouts.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <span className="text-xl font-medium text-neutral-950">Workout Routine</span>
+            {workouts.map(workout => (
+              <div
+                key={workout.id}
+                className="flex flex-col gap-2.5 rounded-base bg-white border border-neutral-200 p-4"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[15px] font-medium text-neutral-950">{workout.name}</span>
+                  <ArrowRight01Icon size={18} color="currentColor" className="text-neutral-500" />
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                <span className="text-[13px] font-normal text-neutral-500">
+                  {workout.exercises.length} exercises
+                </span>
+                {workout.exercises.length > 0 && (
+                  <div className="flex flex-col gap-1.5">
+                    {workout.exercises.slice(0, 3).map((ex, i) => (
+                      <span key={i} className="text-[13px] font-normal text-neutral-500">
+                        {ex.name} — {ex.sets > 0 ? `${ex.sets} sets` : 'No sets'}
+                      </span>
+                    ))}
+                    {workout.exercises.length > 3 && (
+                      <span className="text-[13px] font-medium text-neutral-950">
+                        +{workout.exercises.length - 3} more exercises
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
       </div>
     </main>

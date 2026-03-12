@@ -187,6 +187,77 @@ export async function getClientAttendance(clientId: string): Promise<AttendanceH
   return (data ?? []) as AttendanceHistoryRow[]
 }
 
+// ─── Payment Status ──────────────────────────────────────────────────────────
+
+export type PaymentStatus = {
+  lastPaymentDate: string | null
+  validUntil: string | null
+  amount: number | null
+  currency: string
+  isOverdue: boolean
+}
+
+export async function getClientPaymentStatus(clientId: string): Promise<PaymentStatus> {
+  const supabase = await createServerClientUntyped()
+
+  const { data } = await supabase
+    .from('payments')
+    .select('payment_date, valid_until, amount, currency')
+    .eq('client_id', clientId)
+    .order('payment_date', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (!data) return { lastPaymentDate: null, validUntil: null, amount: null, currency: 'OMR', isOverdue: false }
+
+  const payment = data as { payment_date: string; valid_until: string; amount: number; currency: string }
+  const today = new Date().toISOString().split('T')[0]
+  const isOverdue = payment.valid_until < today
+
+  return {
+    lastPaymentDate: payment.payment_date,
+    validUntil: payment.valid_until,
+    amount: payment.amount,
+    currency: payment.currency ?? 'OMR',
+    isOverdue,
+  }
+}
+
+// ─── Client Workouts ─────────────────────────────────────────────────────────
+
+export type ClientWorkout = {
+  id: string
+  name: string
+  exercises: { name: string; sets: number }[]
+}
+
+export async function getClientWorkouts(clientId: string): Promise<ClientWorkout[]> {
+  const supabase = await createServerClientUntyped()
+
+  const { data, error } = await supabase
+    .from('workouts')
+    .select('id, name, workout_exercises(order_index, sets, exercises(name))')
+    .eq('client_id', clientId)
+    .order('created_at', { ascending: true })
+
+  if (error || !data) return []
+
+  return (data as unknown as {
+    id: string
+    name: string
+    workout_exercises: { order_index: number; sets: unknown; exercises: { name: string } }[]
+  }[]).map(w => ({
+    id: w.id,
+    name: w.name,
+    exercises: (w.workout_exercises ?? [])
+      .sort((a, b) => a.order_index - b.order_index)
+      .map(we => ({
+        name: we.exercises?.name ?? 'Unknown',
+        sets: Array.isArray(we.sets) ? (we.sets as unknown[]).length : 0,
+      })),
+  }))
+}
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 export async function createClient(
