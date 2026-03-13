@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import { SWRProvider } from '@/components/swr-provider'
 import './globals.css'
 
 const inter = Inter({
@@ -34,7 +35,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body>{children}</body>
+      <body><SWRProvider>{children}</SWRProvider></body>
     </html>
   )
 }

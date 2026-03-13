@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerClientUntyped } from '@/lib/supabase/server'
+import { getSessionUser, createServerClientUntyped } from '@/lib/supabase/server'
 import { RecordProgressSelectClient } from './record-progress-select-client'
 
 type ClientOption = {
@@ -9,9 +9,10 @@ type ClientOption = {
 }
 
 export default async function RecordProgressPage() {
-  const supabase = await createServerClientUntyped()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getSessionUser()
   if (!user) redirect('/login')
+
+  const supabase = await createServerClientUntyped()
 
   const { data: trainer } = await supabase
     .from('users').select('id').eq('auth_id', user.id).single()

@@ -1,5 +1,5 @@
 import { redirect, notFound } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { getSessionUser } from '@/lib/supabase/server'
 import { getClientDetail, getClientAttendanceRange } from '@/actions/clients'
 import { AttendanceDetailView } from './attendance-detail-view'
 
@@ -10,8 +10,7 @@ export default async function AttendanceDetailPage({
   params: Promise<{ id: string }>
   searchParams: Promise<{ month?: string }>
 }) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getSessionUser()
   if (!user) redirect('/login')
 
   const { id } = await params

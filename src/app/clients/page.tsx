@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { getSessionUser } from '@/lib/supabase/server'
 import { getClients } from '@/actions/clients'
 import { getTrainerProfile } from '@/actions/dashboard'
 import { ClientsView } from './clients-view'
@@ -15,8 +15,7 @@ export default async function ClientsPage({
 }: {
   searchParams: Promise<{ search?: string; filter?: string }>
 }) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getSessionUser()
   if (!user) redirect('/login')
 
   const params = await searchParams

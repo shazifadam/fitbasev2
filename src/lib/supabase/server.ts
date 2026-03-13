@@ -50,14 +50,36 @@ export async function createServerClientUntyped() {
 
 export const getTrainerId = cache(async (): Promise<string | null> => {
   const supabase = await createServerClientUntyped()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
 
+  // Fast path: read trainer_id from JWT claim (set by custom_access_token_hook)
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) return null
+
+  // Decode trainer_id from the access token JWT claims (set by custom_access_token_hook)
+  try {
+    const payload = JSON.parse(atob(session.access_token.split('.')[1]))
+    if (payload.trainer_id && typeof payload.trainer_id === 'string') {
+      return payload.trainer_id
+    }
+  } catch {
+    // JWT decode failed — fall through to DB lookup
+  }
+
+  // Fallback: DB lookup (only needed if hook isn't enabled yet)
   const { data: trainer } = await supabase
     .from('users')
     .select('id')
-    .eq('auth_id', user.id)
+    .eq('auth_id', session.user.id)
     .single()
 
   return (trainer as { id: string } | null)?.id ?? null
+})
+
+// ─── Quick auth check (reads cookie, no network call) ───────────────────────
+// Use this in page.tsx instead of supabase.auth.getUser() to avoid a
+// redundant round-trip — middleware already validates the session.
+export const getSessionUser = cache(async () => {
+  const supabase = await createServerClientUntyped()
+  const { data: { session } } = await supabase.auth.getSession()
+  return session?.user ?? null
 })

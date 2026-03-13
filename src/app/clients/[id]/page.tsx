@@ -1,5 +1,5 @@
 import { redirect, notFound } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { getSessionUser } from '@/lib/supabase/server'
 import {
   getClientDetail,
   getClientAttendance,
@@ -15,8 +15,7 @@ export default async function ClientDetailPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getSessionUser()
   if (!user) redirect('/login')
 
   const { id } = await params

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { getSessionUser } from '@/lib/supabase/server'
 import { getAttendanceForDate, getTrainerProfile } from '@/actions/dashboard'
 import { DashboardView } from './dashboard-view'
 import { BottomNav } from '@/components/layout/bottom-nav'
@@ -14,8 +14,7 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ date?: string }>
 }) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getSessionUser()
   if (!user) redirect('/login')
 
   const params = await searchParams

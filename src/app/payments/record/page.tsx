@@ -1,10 +1,9 @@
 import { redirect } from 'next/navigation'
-import { createServerClient, createServerClientUntyped } from '@/lib/supabase/server'
+import { getSessionUser, createServerClientUntyped } from '@/lib/supabase/server'
 import { RecordPaymentSelectClient } from './record-payment-select-client'
 
 export default async function RecordPaymentPage() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getSessionUser()
   if (!user) redirect('/login')
 
   const sb = await createServerClientUntyped()

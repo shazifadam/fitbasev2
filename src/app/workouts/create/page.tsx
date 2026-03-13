@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { getSessionUser } from '@/lib/supabase/server'
 import { getExercises } from '@/actions/exercises'
 import { CreateWorkoutView } from './create-workout-view'
 
@@ -8,8 +8,7 @@ export default async function CreateWorkoutPage({
 }: {
   searchParams: Promise<{ client_id?: string }>
 }) {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getSessionUser()
   if (!user) redirect('/login')
 
   const params = await searchParams

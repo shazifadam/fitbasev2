@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import useSWR from 'swr'
 import * as Accordion from '@radix-ui/react-accordion'
 import { HugeiconsIcon, ArrowDown01Icon, CheckmarkCircle01Icon } from '@/components/ui/icon'
 import {
   completeSession,
+  getAttendingSessions,
   type AttendingSession,
   type ExerciseEntry,
   type ExerciseWeights,
@@ -87,12 +89,19 @@ type Props = {
   previousWeights: Record<string, ExerciseWeights | null>
 }
 
-export function AttendingView({ sessions, trainerName, previousWeights }: Props) {
+export function AttendingView({ sessions: fallbackSessions, trainerName, previousWeights }: Props) {
   const router = useRouter()
+
+  // SWR: cache attending sessions so navigating back is instant
+  const { data: sessions } = useSWR(
+    ['attending-sessions'],
+    () => getAttendingSessions(),
+    { fallbackData: fallbackSessions }
+  )
 
   // weights[attendanceId] = mutable ExerciseWeights state
   const [weights, setWeights] = useState<Record<string, ExerciseWeights>>(() =>
-    Object.fromEntries(sessions.map(s => [s.id, initWeights(s)]))
+    Object.fromEntries((sessions ?? []).map(s => [s.id, initWeights(s)]))
   )
 
   const initials = getInitials(trainerName)
@@ -149,7 +158,7 @@ export function AttendingView({ sessions, trainerName, previousWeights }: Props)
         </div>
 
         {/* Empty state */}
-        {sessions.length === 0 && (
+        {(sessions ?? []).length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <span className="text-[15px] font-normal text-neutral-400">
               No active sessions right now
@@ -158,9 +167,9 @@ export function AttendingView({ sessions, trainerName, previousWeights }: Props)
         )}
 
         {/* Accordion */}
-        {sessions.length > 0 && (
+        {(sessions ?? []).length > 0 && (
           <Accordion.Root type="single" collapsible className="flex flex-col gap-2">
-            {sessions.map(session => (
+            {(sessions ?? []).map(session => (
               <SessionItem
                 key={session.id}
                 session={session}

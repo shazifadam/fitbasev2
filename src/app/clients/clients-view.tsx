@@ -2,8 +2,9 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import useSWR from 'swr'
 import { HugeiconsIcon, Search01Icon, DragDropVerticalIcon } from '@/components/ui/icon'
-import type { ClientRow } from '@/actions/clients'
+import { getClients, type ClientRow } from '@/actions/clients'
 
 const FILTER_TABS = [
   { label: 'All',     dbValue: '' },
@@ -24,12 +25,19 @@ type Props = {
   initialFilter: string
 }
 
-export function ClientsView({ clients, trainerInitials, initialSearch, initialFilter }: Props) {
+export function ClientsView({ clients: fallbackClients, trainerInitials, initialSearch, initialFilter }: Props) {
   const router = useRouter()
   const [search, setSearch] = useState(initialSearch)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const activeFilter = initialFilter
+
+  // SWR: cache client list so navigating back is instant
+  const { data: clients } = useSWR(
+    ['clients', initialSearch, initialFilter],
+    () => getClients({ search: initialSearch || undefined, scheduleSet: initialFilter || undefined }),
+    { fallbackData: fallbackClients }
+  )
 
   const updateURL = useCallback((newSearch: string, newFilter: string) => {
     const params = new URLSearchParams()
@@ -109,18 +117,18 @@ export function ClientsView({ clients, trainerInitials, initialSearch, initialFi
         <div className="flex items-center justify-between">
           <span className="text-[14px] font-medium text-neutral-950">Client List</span>
           <span className="text-[13px] font-normal text-neutral-500">
-            {clients.length} client{clients.length !== 1 ? 's' : ''}
+            {(clients ?? []).length} client{(clients ?? []).length !== 1 ? 's' : ''}
           </span>
         </div>
 
         {/* Client Cards */}
         <div className="flex flex-col gap-2">
-          {clients.length === 0 && (
+          {(clients ?? []).length === 0 && (
             <div className="flex items-center justify-center py-12">
               <span className="text-[15px] font-normal text-neutral-400">No clients found</span>
             </div>
           )}
-          {clients.map(client => (
+          {(clients ?? []).map(client => (
             <button
               key={client.id}
               onClick={() => router.push(`/clients/${client.id}`)}

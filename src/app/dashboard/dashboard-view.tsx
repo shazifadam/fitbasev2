@@ -4,9 +4,11 @@ import { useEffect, useMemo, useCallback, useTransition, useState, useRef } from
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import useSWR from 'swr'
 import { HugeiconsIcon, DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from '@/components/ui/icon'
 import { DatePicker } from '@/components/ui/date-picker'
 import { undoAttendance } from '@/actions/session'
+import { getAttendanceForDate } from '@/actions/dashboard'
 import { Spinner } from '@/components/ui/spinner'
 import type { AttendanceWithClient } from '@/actions/dashboard'
 import { AttendingCount } from '@/components/dashboard/attending-count'
@@ -121,11 +123,18 @@ type Props = {
   trainerId: string
 }
 
-export function DashboardView({ date, attendance, trainerName, trainerId }: Props) {
+export function DashboardView({ date, attendance: fallbackAttendance, trainerName, trainerId }: Props) {
   const router = useRouter()
   const [selectedItem, setSelectedItem] = useState<AttendanceWithClient | null>(null)
   const [showWorkoutDrawer, setShowWorkoutDrawer] = useState(false)
   const [dateConfirmed, setDateConfirmed] = useState(false)
+
+  // SWR: cache attendance data so navigating back is instant
+  const { data: attendance } = useSWR(
+    ['attendance', date],
+    () => getAttendanceForDate(date),
+    { fallbackData: fallbackAttendance }
+  )
 
   // Correct to client's local timezone on first mount
   useEffect(() => {
@@ -138,10 +147,10 @@ export function DashboardView({ date, attendance, trainerName, trainerId }: Prop
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const { attending, scheduled, attended, absent } = useMemo(() => ({
-    attending: attendance.filter(a => a.status === 'attending'),
-    scheduled: attendance.filter(a => a.status === 'scheduled'),
-    attended: attendance.filter(a => a.status === 'attended'),
-    absent: attendance.filter(a => a.status === 'missed'),
+    attending: (attendance ?? []).filter(a => a.status === 'attending'),
+    scheduled: (attendance ?? []).filter(a => a.status === 'scheduled'),
+    attended: (attendance ?? []).filter(a => a.status === 'attended'),
+    absent: (attendance ?? []).filter(a => a.status === 'missed'),
   }), [attendance])
 
   const timeGroups = useMemo(() => {
@@ -278,7 +287,7 @@ export function DashboardView({ date, attendance, trainerName, trainerId }: Prop
         )}
 
         {/* Empty state */}
-        {attendance.length === 0 && (
+        {(attendance ?? []).length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <span className="text-[15px] font-normal text-neutral-400">
               No sessions scheduled for this day

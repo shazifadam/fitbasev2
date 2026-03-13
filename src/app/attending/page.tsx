@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@/lib/supabase/server'
+import { getSessionUser } from '@/lib/supabase/server'
 import { getAttendingSessions, getPreviousSessionWeights } from '@/actions/attending'
 import type { ExerciseWeights } from '@/actions/attending'
 import { getTrainerProfile } from '@/actions/dashboard'
@@ -7,8 +7,7 @@ import { AttendingView } from './attending-view'
 import { BottomNav } from '@/components/layout/bottom-nav'
 
 export default async function AttendingPage() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getSessionUser()
   if (!user) redirect('/login')
 
   const [sessions, trainer] = await Promise.all([
