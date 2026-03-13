@@ -105,7 +105,7 @@ export function AttendingView({ sessions, trainerName }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-100 pb-24">
+    <main className="min-h-screen bg-neutral-100 pb-32">
       <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
 
         {/* Header */}
@@ -229,9 +229,9 @@ function SessionItem({ session, sessionWeights, onUpdateSet, onComplete }: Sessi
               <span className="text-[14px] font-medium text-neutral-950">{ex.exercise_name}</span>
 
               {/* Set rows */}
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 min-w-0">
                 {/* Column headers */}
-                <div className="grid grid-cols-[32px_1fr_1fr_32px] gap-2 px-1">
+                <div className="grid grid-cols-[28px_1fr_1fr_28px] gap-1.5 px-1">
                   <span className="text-[11px] font-normal text-neutral-400 text-center">Set</span>
                   <span className="text-[11px] font-normal text-neutral-400 text-center">kg</span>
                   <span className="text-[11px] font-normal text-neutral-400 text-center">Reps</span>
@@ -242,7 +242,7 @@ function SessionItem({ session, sessionWeights, onUpdateSet, onComplete }: Sessi
                   <div
                     key={set.set_number}
                     className={cn(
-                      'grid grid-cols-[32px_1fr_1fr_32px] gap-2 items-center rounded-base px-1 py-1',
+                      'grid grid-cols-[28px_1fr_1fr_28px] gap-1.5 items-center rounded-base px-1 py-1',
                       set.completed ? 'bg-neutral-50' : ''
                     )}
                   >
@@ -261,7 +261,7 @@ function SessionItem({ session, sessionWeights, onUpdateSet, onComplete }: Sessi
                         onUpdateSet(exIdx, setIdx, 'weight_kg',
                           e.target.value === '' ? null : parseFloat(e.target.value))
                       }
-                      className="h-9 rounded-base border border-neutral-200 px-2 text-center text-[13px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
+                      className="h-9 w-full min-w-0 rounded-base border border-neutral-200 px-1 text-center text-[13px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
                     />
 
                     {/* Reps */}
@@ -274,7 +274,7 @@ function SessionItem({ session, sessionWeights, onUpdateSet, onComplete }: Sessi
                         onUpdateSet(exIdx, setIdx, 'reps',
                           e.target.value === '' ? null : parseInt(e.target.value, 10))
                       }
-                      className="h-9 rounded-base border border-neutral-200 px-2 text-center text-[13px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
+                      className="h-9 w-full min-w-0 rounded-base border border-neutral-200 px-1 text-center text-[13px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
                     />
 
                     {/* Completed toggle */}

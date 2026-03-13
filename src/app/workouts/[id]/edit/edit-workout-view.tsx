@@ -192,29 +192,29 @@ function SetGrid({
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="grid grid-cols-[32px_1fr_1fr_28px] gap-2 px-1">
+    <div className="flex flex-col gap-2 min-w-0">
+      <div className="grid grid-cols-[28px_1fr_1fr_28px] gap-1.5 px-1">
         <span className="text-[12px] font-normal text-neutral-400">Set</span>
         <span className="text-[12px] font-normal text-neutral-400">Reps</span>
         <span className="text-[12px] font-normal text-neutral-400">Weight (kg)</span>
         <span />
       </div>
       {sets.map((s, i) => (
-        <div key={i} className="grid grid-cols-[32px_1fr_1fr_28px] gap-2 items-center px-1">
+        <div key={i} className="grid grid-cols-[28px_1fr_1fr_28px] gap-1.5 items-center px-1">
           <span className="text-[14px] font-normal text-neutral-950">{s.set_number}</span>
           <input
             type="number"
             inputMode="numeric"
             value={s.reps || ''}
             onChange={e => updateSet(i, 'reps', Number(e.target.value))}
-            className="h-10 rounded-base border border-neutral-200 px-2 text-center text-[14px] font-normal text-neutral-950 bg-white outline-none focus:border-neutral-800"
+            className="h-10 w-full min-w-0 rounded-base border border-neutral-200 px-1 text-center text-[14px] font-normal text-neutral-950 bg-white outline-none focus:border-neutral-800"
           />
           <input
             type="number"
             inputMode="decimal"
             value={s.weight_kg || ''}
             onChange={e => updateSet(i, 'weight_kg', Number(e.target.value))}
-            className="h-10 rounded-base border border-neutral-200 px-2 text-center text-[14px] font-normal text-neutral-950 bg-white outline-none focus:border-neutral-800"
+            className="h-10 w-full min-w-0 rounded-base border border-neutral-200 px-1 text-center text-[14px] font-normal text-neutral-950 bg-white outline-none focus:border-neutral-800"
           />
           <button onClick={() => removeSet(i)} className="text-neutral-400">
             <HugeiconsIcon icon={Cancel01Icon} size={16} color="currentColor" />
@@ -291,7 +291,7 @@ export function EditWorkoutView({ workout, exercises }: Props) {
       if (result.error) {
         setError(result.error)
       } else {
-        router.push(`/workouts/${workout.id}`)
+        router.replace(`/workouts/${workout.id}`)
       }
     })
   }
@@ -308,8 +308,8 @@ export function EditWorkoutView({ workout, exercises }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-100 pb-24">
-      <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
+    <main className="min-h-screen bg-neutral-100 pb-32 overflow-x-hidden">
+      <div className="flex flex-col gap-6 px-6 pt-12 pb-6 min-w-0">
 
         <button onClick={() => router.back()} className="flex items-center gap-1.5 self-start">
           <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
