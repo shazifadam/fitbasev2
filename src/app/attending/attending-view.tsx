@@ -214,7 +214,7 @@ function SessionItem({ session, sessionWeights, prevWeights, onUpdateSet, onComp
   return (
     <Accordion.Item
       value={session.id}
-      className="rounded-card bg-white border border-neutral-200 overflow-hidden"
+      className="rounded-base bg-white border border-neutral-200 overflow-hidden"
     >
       {/* Trigger */}
       <Accordion.Trigger className="flex w-full items-center justify-between px-4 py-4 text-left group">
