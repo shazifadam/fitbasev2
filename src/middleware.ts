@@ -55,7 +55,11 @@ export async function middleware(request: NextRequest) {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
         const payload = JSON.parse(atob(session.access_token.split('.')[1]))
-        onboardingCompleted = payload.onboarding_completed === true
+        // Only override if the claim exists in the JWT — old tokens without
+        // the claim should default to true (skip onboarding)
+        if ('onboarding_completed' in payload) {
+          onboardingCompleted = payload.onboarding_completed === true
+        }
       }
     } catch {
       // JWT decode failed — skip onboarding check

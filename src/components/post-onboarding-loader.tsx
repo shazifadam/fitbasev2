@@ -23,10 +23,13 @@ export function PostOnboardingLoader() {
   const [active, setActive] = useState(checkFlag)
   const [msgIndex, setMsgIndex] = useState(0)
 
-  // Clear flag and set dismiss timer on mount
+  // Clear flag, remove the blocking DOM overlay, and set dismiss timer
   useEffect(() => {
     if (!active) return
     sessionStorage.removeItem('fitbase_onboarding_loading')
+
+    // Remove the raw DOM overlay injected by the blocking script in layout
+    document.getElementById('ob-loader')?.remove()
 
     // Show all messages through "Stretching the spreadsheets..." then dismiss
     // 4 messages × 1.8s = 7.2s
