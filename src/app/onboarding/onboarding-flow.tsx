@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HugeiconsIcon, UserGroupIcon, Calendar01Icon, Dumbbell01Icon, Money01Icon, BarChartIcon, CheckmarkCircle01Icon } from '@/components/ui/icon'
 import { completeOnboarding } from '@/actions/onboarding'
@@ -28,7 +27,6 @@ const SWIPE_THRESHOLD = 50
 type Props = { trainerName: string }
 
 export function OnboardingFlow({ trainerName }: Props) {
-  const router = useRouter()
   const [step, setStep] = useState(0)
   const [direction, setDirection] = useState(1)
   const [isPending, startTransition] = useTransition()
@@ -54,7 +52,8 @@ export function OnboardingFlow({ trainerName }: Props) {
         // Refresh JWT so middleware sees onboarding_completed = true
         const supabase = createClient()
         await supabase.auth.refreshSession()
-        router.push('/dashboard')
+        // Full navigation to ensure middleware reads the updated cookie
+        window.location.href = '/dashboard'
       })
     }
   }
