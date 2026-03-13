@@ -32,12 +32,30 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error && user) {
-      await supabase.from('users').upsert({
-        auth_id: user.id,
-        email: user.email!,
-        display_name: user.user_metadata.full_name || user.email!.split('@')[0],
-        photo_url: user.user_metadata.avatar_url || null,
-      }, { onConflict: 'auth_id' })
+      // Check if user already exists
+      const { data: existing } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .single()
+
+      if (existing) {
+        // Existing user — only update profile fields, preserve onboarding_completed
+        await supabase.from('users').update({
+          email: user.email!,
+          display_name: user.user_metadata.full_name || user.email!.split('@')[0],
+          photo_url: user.user_metadata.avatar_url || null,
+        }).eq('auth_id', user.id)
+      } else {
+        // New user — insert with onboarding_completed = false
+        await supabase.from('users').insert({
+          auth_id: user.id,
+          email: user.email!,
+          display_name: user.user_metadata.full_name || user.email!.split('@')[0],
+          photo_url: user.user_metadata.avatar_url || null,
+          onboarding_completed: false,
+        })
+      }
     }
   }
 
