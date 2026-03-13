@@ -216,8 +216,8 @@ export function ProgressHistoryView({ data }: Props) {
 
       {/* Header */}
       <div className="flex items-center gap-3 h-12 px-5 pt-14">
-        <button onClick={() => router.back()}>
-          <HugeiconsIcon icon={ArrowLeft01Icon} size={24} color="currentColor" className="text-neutral-950" />
+        <button onClick={() => router.back()} className="flex items-center justify-center h-11 w-11 -ml-2 rounded-base active:bg-neutral-200">
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={22} color="currentColor" className="text-neutral-950" />
         </button>
         <span className="text-[18px] font-medium text-neutral-950">Progress History</span>
       </div>

@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { HugeiconsIcon, ArrowDown01Icon, ArrowLeft01Icon } from '@/components/ui/icon'
+import { HugeiconsIcon, ArrowLeft01Icon } from '@/components/ui/icon'
+import { SelectInput } from '@/components/ui/select-input'
 import { Spinner } from '@/components/ui/spinner'
 import { createClient, type TierRow } from '@/actions/clients'
 
@@ -122,8 +123,8 @@ export function AddClientForm({ tiers }: Props) {
 
         {/* Header */}
         <div className="flex items-center gap-3">
-          <button onClick={() => router.back()} className="text-neutral-950" aria-label="Go back">
-            <HugeiconsIcon icon={ArrowLeft01Icon} size={24} color="currentColor" />
+          <button onClick={() => router.back()} className="flex items-center justify-center h-11 w-11 -ml-2 rounded-base text-neutral-950 active:bg-neutral-200" aria-label="Go back">
+            <HugeiconsIcon icon={ArrowLeft01Icon} size={22} color="currentColor" />
           </button>
           <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px]">
             Add New Client
@@ -186,19 +187,12 @@ export function AddClientForm({ tiers }: Props) {
           {/* Membership Tier */}
           <div className="flex flex-col gap-1.5">
             <label className="text-[14px] font-medium text-neutral-950">Membership Tier</label>
-            <div className="relative">
-              <select
-                value={tierId}
-                onChange={e => setTierId(e.target.value)}
-                className="w-full h-12 appearance-none rounded-base border border-neutral-200 px-[14px] text-[14px] font-normal text-neutral-950 bg-white outline-none focus:border-neutral-800 pr-10"
-              >
-                <option value="">Select tier</option>
-                {tiers.map(tier => (
-                  <option key={tier.id} value={tier.id}>{tier.name}</option>
-                ))}
-              </select>
-              <HugeiconsIcon icon={ArrowDown01Icon} size={18} color="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
-            </div>
+            <SelectInput
+              options={tiers.map(tier => ({ label: tier.name, value: tier.id }))}
+              value={tierId}
+              onChange={setTierId}
+              placeholder="Select tier"
+            />
           </div>
 
           {/* Schedule Set */}

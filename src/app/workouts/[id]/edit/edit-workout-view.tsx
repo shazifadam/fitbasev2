@@ -15,6 +15,7 @@ import {
   BottomDrawerContent,
 } from '@/components/ui/bottom-drawer'
 import { updateWorkout, deleteWorkout } from '@/actions/workouts'
+import { SelectInput } from '@/components/ui/select-input'
 import { createExercise } from '@/actions/exercises'
 import type { ExerciseRow } from '@/actions/exercises'
 import type { WorkoutDetail, WorkoutSetRow } from '@/actions/workouts'
@@ -124,19 +125,19 @@ function SearchExercisesSheet({
                 onChange={e => setNewName(e.target.value)}
                 className="h-10 rounded-base border border-neutral-200 px-3 text-[14px] font-normal text-neutral-950 outline-none focus:border-neutral-800 placeholder:text-neutral-400"
               />
-              <select
+              <SelectInput
+                options={[
+                  { label: 'Chest', value: 'Chest' },
+                  { label: 'Back', value: 'Back' },
+                  { label: 'Legs', value: 'Legs' },
+                  { label: 'Shoulders', value: 'Shoulders' },
+                  { label: 'Arms', value: 'Arms' },
+                  { label: 'Core', value: 'Core' },
+                ]}
                 value={newBodyPart}
-                onChange={e => setNewBodyPart(e.target.value)}
-                className="h-10 rounded-base border border-neutral-200 px-3 text-[14px] font-normal text-neutral-950 bg-white outline-none appearance-none"
-              >
-                <option value="">Muscle group</option>
-                <option value="Chest">Chest</option>
-                <option value="Back">Back</option>
-                <option value="Legs">Legs</option>
-                <option value="Shoulders">Shoulders</option>
-                <option value="Arms">Arms</option>
-                <option value="Core">Core</option>
-              </select>
+                onChange={setNewBodyPart}
+                placeholder="Muscle group"
+              />
               <button
                 onClick={handleCreateExercise}
                 disabled={isPending || !newName.trim()}
@@ -311,9 +312,9 @@ export function EditWorkoutView({ workout, exercises }: Props) {
     <main className="min-h-screen bg-neutral-100 pb-32 overflow-x-hidden">
       <div className="flex flex-col gap-6 px-6 pt-12 pb-6 min-w-0">
 
-        <button onClick={() => router.back()} className="flex items-center gap-1.5 self-start">
-          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
-          <span className="text-[13px] font-normal text-neutral-500">Back</span>
+        <button onClick={() => router.back()} className="flex items-center gap-2 self-start -ml-2 px-2 py-2 rounded-base active:bg-neutral-200">
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="currentColor" className="text-neutral-500" />
+          <span className="text-[14px] font-normal text-neutral-500">Back</span>
         </button>
 
         <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px] -mt-2">

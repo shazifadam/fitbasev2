@@ -4,7 +4,8 @@ import { useEffect, useMemo, useCallback, useTransition, useState, useRef } from
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { HugeiconsIcon, Calendar01Icon, DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from '@/components/ui/icon'
+import { HugeiconsIcon, DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from '@/components/ui/icon'
+import { DatePicker } from '@/components/ui/date-picker'
 import { undoAttendance } from '@/actions/session'
 import { Spinner } from '@/components/ui/spinner'
 import type { AttendanceWithClient } from '@/actions/dashboard'
@@ -200,18 +201,11 @@ export function DashboardView({ date, attendance, trainerName, trainerId }: Prop
         </div>
 
         {/* Date Picker — defaults to today, calendar icon opens native picker */}
-        <label className="relative flex items-center justify-between h-12 px-4 bg-white rounded-base border border-neutral-200 cursor-pointer">
-          <span className="text-[15px] font-medium text-neutral-950">
-            {formatDateLabel(date)}
-          </span>
-          <HugeiconsIcon icon={Calendar01Icon} size={20} color="currentColor" className="text-neutral-400 shrink-0" />
-          <input
-            type="date"
-            value={date}
-            onChange={e => router.push(`/dashboard?date=${e.target.value}`)}
-            className="absolute inset-0 opacity-0 cursor-pointer"
-          />
-        </label>
+        <DatePicker
+          value={date}
+          onChange={v => router.push(`/dashboard?date=${v}`)}
+          placeholder="Select date"
+        />
 
         {/* Summary Banner — hidden when 0 attending (PRD 1.1) */}
         {attending.length > 0 && (

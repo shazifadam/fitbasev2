@@ -9,8 +9,8 @@ import {
   FilterIcon,
   Download04Icon,
   Cancel01Icon,
-  Calendar01Icon,
 } from '@/components/ui/icon'
+import { DatePicker } from '@/components/ui/date-picker'
 import {
   BottomDrawer,
   BottomDrawerContent,
@@ -220,25 +220,21 @@ function ExportDrawer({
           <div className="flex flex-col gap-2">
             <span className="text-[14px] font-medium text-neutral-950">Date Range</span>
             <div className="flex items-center gap-3">
-              <label className="flex flex-1 items-center gap-2 h-11 rounded-base border border-neutral-200 px-3 bg-white">
-                <HugeiconsIcon icon={Calendar01Icon} size={16} color="currentColor" className="text-neutral-400 shrink-0" />
-                <input
-                  type="date"
+              <div className="flex-1">
+                <DatePicker
                   value={fromDate}
-                  onChange={e => setFromDate(e.target.value)}
-                  className="w-full text-[13px] font-normal text-neutral-950 outline-none bg-transparent"
+                  onChange={setFromDate}
+                  placeholder="From"
                 />
-              </label>
+              </div>
               <span className="text-[13px] font-normal text-neutral-400">to</span>
-              <label className="flex flex-1 items-center gap-2 h-11 rounded-base border border-neutral-200 px-3 bg-white">
-                <HugeiconsIcon icon={Calendar01Icon} size={16} color="currentColor" className="text-neutral-400 shrink-0" />
-                <input
-                  type="date"
+              <div className="flex-1">
+                <DatePicker
                   value={toDate}
-                  onChange={e => setToDate(e.target.value)}
-                  className="w-full text-[13px] font-normal text-neutral-950 outline-none bg-transparent"
+                  onChange={setToDate}
+                  placeholder="To"
                 />
-              </label>
+              </div>
             </div>
           </div>
 
@@ -355,8 +351,8 @@ export function AttendanceDetailView({ client, attendance, year, month }: Props)
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => router.back()}>
-              <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="currentColor" className="text-neutral-950" />
+            <button onClick={() => router.back()} className="flex items-center justify-center h-11 w-11 -ml-2 rounded-base active:bg-neutral-200">
+              <HugeiconsIcon icon={ArrowLeft01Icon} size={22} color="currentColor" className="text-neutral-950" />
             </button>
             <div className="flex flex-col">
               <span className="text-[12px] font-normal text-neutral-500">Back to Client</span>
@@ -401,25 +397,21 @@ export function AttendanceDetailView({ client, attendance, year, month }: Props)
           <div className="flex flex-col gap-3">
             <span className="text-[14px] font-medium text-neutral-950">Date Range</span>
             <div className="flex items-center gap-3">
-              <label className="flex flex-1 items-center gap-2 h-11 rounded-base border border-neutral-200 px-3 bg-white">
-                <HugeiconsIcon icon={Calendar01Icon} size={16} color="currentColor" className="text-neutral-400 shrink-0" />
-                <input
-                  type="date"
+              <div className="flex-1">
+                <DatePicker
                   value={fromDate}
-                  onChange={e => setFromDate(e.target.value)}
-                  className="w-full text-[13px] font-normal text-neutral-950 outline-none bg-transparent"
+                  onChange={setFromDate}
+                  placeholder="From"
                 />
-              </label>
+              </div>
               <span className="text-[13px] font-normal text-neutral-400">to</span>
-              <label className="flex flex-1 items-center gap-2 h-11 rounded-base border border-neutral-200 px-3 bg-white">
-                <HugeiconsIcon icon={Calendar01Icon} size={16} color="currentColor" className="text-neutral-400 shrink-0" />
-                <input
-                  type="date"
+              <div className="flex-1">
+                <DatePicker
                   value={toDate}
-                  onChange={e => setToDate(e.target.value)}
-                  className="w-full text-[13px] font-normal text-neutral-950 outline-none bg-transparent"
+                  onChange={setToDate}
+                  placeholder="To"
                 />
-              </label>
+              </div>
             </div>
             <button
               onClick={handleApplyFilter}

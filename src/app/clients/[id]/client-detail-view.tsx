@@ -326,10 +326,10 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
         {/* Back link */}
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-1.5 self-start"
+          className="flex items-center gap-2 self-start -ml-2 px-2 py-2 rounded-base active:bg-neutral-200"
         >
-          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
-          <span className="text-[13px] font-normal text-neutral-500">Back to Clients</span>
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="currentColor" className="text-neutral-500" />
+          <span className="text-[14px] font-normal text-neutral-500">Back to Clients</span>
         </button>
 
         {/* Name + menu */}

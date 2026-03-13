@@ -14,6 +14,7 @@ import {
   BottomDrawer,
   BottomDrawerContent,
 } from '@/components/ui/bottom-drawer'
+import { SelectInput } from '@/components/ui/select-input'
 import { createExercise, deleteExercise } from '@/actions/exercises'
 import type { ExerciseRow } from '@/actions/exercises'
 import { Spinner } from '@/components/ui/spinner'
@@ -92,37 +93,35 @@ function AddExerciseDrawer({
           {/* Muscle Group */}
           <div className="flex flex-col gap-1.5">
             <span className="text-[14px] font-medium text-neutral-950">Muscle Group</span>
-            <select
+            <SelectInput
+              options={[
+                ...BODY_PARTS.filter(b => b !== 'All').map(bp => ({ label: bp, value: bp })),
+                { label: 'Other', value: 'Other' },
+              ]}
               value={bodyPart}
-              onChange={e => setBodyPart(e.target.value)}
-              className="h-11 rounded-base border border-neutral-200 px-3 text-[15px] font-normal text-neutral-950 bg-white outline-none focus:border-neutral-800 appearance-none"
-            >
-              <option value="">Select muscle group</option>
-              {BODY_PARTS.filter(b => b !== 'All').map(bp => (
-                <option key={bp} value={bp}>{bp}</option>
-              ))}
-              <option value="Other">Other</option>
-            </select>
+              onChange={setBodyPart}
+              placeholder="Select muscle group"
+            />
           </div>
 
           {/* Equipment */}
           <div className="flex flex-col gap-1.5">
             <span className="text-[14px] font-medium text-neutral-950">Equipment</span>
-            <select
+            <SelectInput
+              options={[
+                { label: 'Barbell', value: 'Barbell' },
+                { label: 'Dumbbell', value: 'Dumbbell' },
+                { label: 'Machine', value: 'Machine' },
+                { label: 'Cable', value: 'Cable' },
+                { label: 'Bodyweight', value: 'Bodyweight' },
+                { label: 'Kettlebell', value: 'Kettlebell' },
+                { label: 'Bands', value: 'Bands' },
+                { label: 'None', value: 'None' },
+              ]}
               value={equipment}
-              onChange={e => setEquipment(e.target.value)}
-              className="h-11 rounded-base border border-neutral-200 px-3 text-[15px] font-normal text-neutral-950 bg-white outline-none focus:border-neutral-800 appearance-none"
-            >
-              <option value="">Select equipment</option>
-              <option value="Barbell">Barbell</option>
-              <option value="Dumbbell">Dumbbell</option>
-              <option value="Machine">Machine</option>
-              <option value="Cable">Cable</option>
-              <option value="Bodyweight">Bodyweight</option>
-              <option value="Kettlebell">Kettlebell</option>
-              <option value="Bands">Bands</option>
-              <option value="None">None</option>
-            </select>
+              onChange={setEquipment}
+              placeholder="Select equipment"
+            />
           </div>
 
           {/* Notes */}
@@ -202,8 +201,8 @@ export function ExerciseLibraryView({ exercises }: Props) {
 
         {/* Header */}
         <div className="flex items-center gap-3">
-          <button onClick={() => router.back()}>
-            <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="currentColor" className="text-neutral-950" />
+          <button onClick={() => router.back()} className="flex items-center justify-center h-11 w-11 -ml-2 rounded-base active:bg-neutral-200">
+            <HugeiconsIcon icon={ArrowLeft01Icon} size={22} color="currentColor" className="text-neutral-950" />
           </button>
           <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px]">
             Exercise Library

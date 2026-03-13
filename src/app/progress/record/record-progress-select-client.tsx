@@ -26,9 +26,9 @@ export function RecordProgressSelectClient({ clients }: Props) {
     <main className="min-h-screen bg-neutral-100 pb-24">
       <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
 
-        <button onClick={() => router.back()} className="flex items-center gap-1.5 self-start">
-          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
-          <span className="text-[13px] font-normal text-neutral-500">Back</span>
+        <button onClick={() => router.back()} className="flex items-center gap-2 self-start -ml-2 px-2 py-2 rounded-base active:bg-neutral-200">
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="currentColor" className="text-neutral-500" />
+          <span className="text-[14px] font-normal text-neutral-500">Back</span>
         </button>
 
         <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px] -mt-2">

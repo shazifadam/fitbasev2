@@ -2,7 +2,8 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { HugeiconsIcon, Cancel01Icon, ArrowDown01Icon } from '@/components/ui/icon'
+import { HugeiconsIcon, Cancel01Icon } from '@/components/ui/icon'
+import { SelectInput } from '@/components/ui/select-input'
 import {
   BottomDrawer,
   BottomDrawerContent,
@@ -97,19 +98,17 @@ export function RecordPaymentDrawer({ open, onClose, clientId, tierAmount, curre
           {/* Payment Method */}
           <div className="flex flex-col gap-1.5">
             <span className="text-[14px] font-normal text-neutral-950">Payment Method</span>
-            <div className="relative">
-              <select
-                value={method}
-                onChange={e => setMethod(e.target.value)}
-                className="h-11 w-full rounded-base border border-neutral-200 px-3 pr-10 text-[15px] font-normal text-neutral-950 bg-white outline-none appearance-none"
-              >
-                <option value="Bank Transfer">Bank Transfer</option>
-                <option value="Cash">Cash</option>
-                <option value="Card">Card</option>
-                <option value="Other">Other</option>
-              </select>
-              <HugeiconsIcon icon={ArrowDown01Icon} size={18} color="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
-            </div>
+            <SelectInput
+              options={[
+                { label: 'Bank Transfer', value: 'Bank Transfer' },
+                { label: 'Cash', value: 'Cash' },
+                { label: 'Card', value: 'Card' },
+                { label: 'Other', value: 'Other' },
+              ]}
+              value={method}
+              onChange={setMethod}
+              placeholder="Select method"
+            />
           </div>
 
           {/* Notes */}

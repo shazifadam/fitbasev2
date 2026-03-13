@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { HugeiconsIcon, Calendar01Icon, Cancel01Icon } from '@/components/ui/icon'
+import { DatePicker } from '@/components/ui/date-picker'
 import {
   BottomDrawer,
   BottomDrawerContent,
@@ -126,12 +127,11 @@ export function SessionActionDrawer({ open, attendance, onClose, onStartSession 
               <div className="flex flex-col gap-3">
                 <label className="flex flex-col gap-1">
                   <span className="text-[13px] font-normal text-neutral-500">New Date</span>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={newDate}
+                    onChange={setNewDate}
                     min={todayLocal()}
-                    onChange={e => setNewDate(e.target.value)}
-                    className="h-11 rounded-base border border-neutral-200 px-3 text-[15px] font-normal text-neutral-950 bg-white outline-none focus:border-neutral-800"
+                    placeholder="Select new date"
                   />
                 </label>
                 <label className="flex flex-col gap-1">

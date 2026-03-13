@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { HugeiconsIcon, ArrowLeft01Icon } from '@/components/ui/icon'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Spinner } from '@/components/ui/spinner'
 import { recordProgress } from '@/actions/progress'
 import type { PreviousMeasurement } from '@/actions/progress'
@@ -86,9 +87,9 @@ export function RecordProgressForm({ client, previous }: Props) {
       <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
 
         {/* Back */}
-        <button onClick={() => router.back()} className="flex items-center gap-1.5 self-start">
-          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
-          <span className="text-[13px] font-normal text-neutral-500">Back</span>
+        <button onClick={() => router.back()} className="flex items-center gap-2 self-start -ml-2 px-2 py-2 rounded-base active:bg-neutral-200">
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="currentColor" className="text-neutral-500" />
+          <span className="text-[14px] font-normal text-neutral-500">Back</span>
         </button>
 
         <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px] -mt-2">
@@ -141,11 +142,10 @@ export function RecordProgressForm({ client, previous }: Props) {
         {/* Date */}
         <div className="flex flex-col gap-2">
           <span className="text-[14px] font-medium text-neutral-950">Date</span>
-          <input
-            type="date"
+          <DatePicker
             value={date}
-            onChange={e => setDate(e.target.value)}
-            className="h-12 w-full rounded-base border border-neutral-200 bg-white px-4 text-[15px] font-normal text-neutral-950 outline-none focus:border-neutral-800 box-border"
+            onChange={setDate}
+            placeholder="Select date"
           />
         </div>
 
