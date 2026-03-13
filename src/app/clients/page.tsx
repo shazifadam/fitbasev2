@@ -10,13 +10,22 @@ function getInitials(name: string | null): string {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 }
 
-export default async function ClientsPage() {
+export default async function ClientsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string; filter?: string }>
+}) {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const params = await searchParams
+
   const [clients, trainer] = await Promise.all([
-    getClients(),
+    getClients({
+      search: params.search || undefined,
+      scheduleSet: params.filter || undefined,
+    }),
     getTrainerProfile(),
   ])
 
@@ -25,6 +34,8 @@ export default async function ClientsPage() {
       <ClientsView
         clients={clients}
         trainerInitials={getInitials(trainer?.display_name ?? null)}
+        initialSearch={params.search ?? ''}
+        initialFilter={params.filter ?? ''}
       />
       <BottomNav />
     </>

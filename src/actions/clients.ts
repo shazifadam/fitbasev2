@@ -81,14 +81,26 @@ function generateAttendanceRecords(
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
-export async function getClients(): Promise<ClientRow[]> {
+export async function getClients(opts?: {
+  search?: string
+  scheduleSet?: string
+}): Promise<ClientRow[]> {
   const supabase = await createServerClientUntyped()
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('clients')
     .select('id, name, training_programs, schedule_set, tier_id')
     .eq('is_archived', false)
-    .order('name', { ascending: true })
+
+  if (opts?.search) {
+    query = query.ilike('name', `%${opts.search}%`)
+  }
+
+  if (opts?.scheduleSet) {
+    query = query.eq('schedule_set', opts.scheduleSet)
+  }
+
+  const { data, error } = await query.order('name', { ascending: true })
 
   if (error) {
     console.error('getClients error:', error)

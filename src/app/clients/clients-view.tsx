@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { HugeiconsIcon, Search01Icon, DragDropVerticalIcon } from '@/components/ui/icon'
 import type { ClientRow } from '@/actions/clients'
 
@@ -11,32 +11,53 @@ const FILTER_TABS = [
   { label: 'Sat Set', dbValue: 'saturday' },
   { label: 'Custom',  dbValue: 'custom' },
 ] as const
-type FilterTab = typeof FILTER_TABS[number]['label']
-
 
 function formatPrograms(programs: string[] | null | undefined): string {
   if (!programs || programs.length === 0) return ''
   return programs.slice(0, 2).join(' · ')
 }
 
-
 type Props = {
   clients: ClientRow[]
   trainerInitials: string
+  initialSearch: string
+  initialFilter: string
 }
 
-export function ClientsView({ clients, trainerInitials }: Props) {
+export function ClientsView({ clients, trainerInitials, initialSearch, initialFilter }: Props) {
   const router = useRouter()
-  const [search, setSearch] = useState('')
-  const [activeFilter, setActiveFilter] = useState<FilterTab>('All')
+  const searchParams = useSearchParams()
+  const [search, setSearch] = useState(initialSearch)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const activeDbValue = FILTER_TABS.find(t => t.label === activeFilter)?.dbValue ?? ''
+  const activeFilter = initialFilter
 
-  const filtered = clients.filter(c => {
-    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase())
-    const matchesFilter = activeDbValue === '' || c.schedule_set === activeDbValue
-    return matchesSearch && matchesFilter
-  })
+  const updateURL = useCallback((newSearch: string, newFilter: string) => {
+    const params = new URLSearchParams()
+    if (newSearch) params.set('search', newSearch)
+    if (newFilter) params.set('filter', newFilter)
+    const qs = params.toString()
+    router.replace(`/clients${qs ? `?${qs}` : ''}`)
+  }, [router])
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      updateURL(value, activeFilter)
+    }, 300)
+  }, [activeFilter, updateURL])
+
+  const handleFilterChange = useCallback((dbValue: string) => {
+    updateURL(search, dbValue)
+  }, [search, updateURL])
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [])
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">
@@ -62,7 +83,7 @@ export function ClientsView({ clients, trainerInitials }: Props) {
             type="text"
             placeholder="Search clients..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => handleSearchChange(e.target.value)}
             className="flex-1 text-[14px] font-normal text-neutral-950 placeholder:text-neutral-400 bg-transparent outline-none"
           />
         </div>
@@ -72,10 +93,10 @@ export function ClientsView({ clients, trainerInitials }: Props) {
           {FILTER_TABS.map(tab => (
             <button
               key={tab.label}
-              onClick={() => setActiveFilter(tab.label)}
+              onClick={() => handleFilterChange(tab.dbValue)}
               className={[
                 'flex items-center justify-center rounded-base px-4 py-2 text-[13px] font-normal transition-colors',
-                activeFilter === tab.label
+                activeFilter === tab.dbValue
                   ? 'bg-neutral-800 text-white'
                   : 'bg-neutral-200 text-neutral-950',
               ].join(' ')}
@@ -89,18 +110,18 @@ export function ClientsView({ clients, trainerInitials }: Props) {
         <div className="flex items-center justify-between">
           <span className="text-[14px] font-medium text-neutral-950">Client List</span>
           <span className="text-[13px] font-normal text-neutral-500">
-            {filtered.length} client{filtered.length !== 1 ? 's' : ''}
+            {clients.length} client{clients.length !== 1 ? 's' : ''}
           </span>
         </div>
 
         {/* Client Cards */}
         <div className="flex flex-col gap-2">
-          {filtered.length === 0 && (
+          {clients.length === 0 && (
             <div className="flex items-center justify-center py-12">
               <span className="text-[15px] font-normal text-neutral-400">No clients found</span>
             </div>
           )}
-          {filtered.map(client => (
+          {clients.map(client => (
             <button
               key={client.id}
               onClick={() => router.push(`/clients/${client.id}`)}
