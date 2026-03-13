@@ -4,7 +4,7 @@ import { useEffect, useMemo, useCallback, useTransition, useState, useRef } from
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import { HugeiconsIcon, DragDropVerticalIcon, CheckmarkCircle01Icon, CancelCircleIcon } from '@/components/ui/icon'
 import { DatePicker } from '@/components/ui/date-picker'
 import { undoAttendance } from '@/actions/session'
@@ -53,6 +53,7 @@ function formatEndedTime(dateStr: string | null): string {
 
 function AttendedCard({ item }: { item: AttendanceWithClient }) {
   const router = useRouter()
+  const { mutate } = useSWRConfig()
   const [showMenu, setShowMenu] = useState(false)
   const [isPending, startTransition] = useTransition()
   const menuRef = useRef<HTMLDivElement>(null)
@@ -72,6 +73,7 @@ function AttendedCard({ item }: { item: AttendanceWithClient }) {
     startTransition(async () => {
       await undoAttendance(item.id)
       setShowMenu(false)
+      mutate((key: unknown) => Array.isArray(key) && key[0] === 'attendance')
       router.refresh()
     })
   }

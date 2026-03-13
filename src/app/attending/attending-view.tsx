@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useTransition, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import * as Accordion from '@radix-ui/react-accordion'
 import { HugeiconsIcon, ArrowDown01Icon, CheckmarkCircle01Icon } from '@/components/ui/icon'
 import {
   completeSession,
+  saveExerciseWeights,
   getAttendingSessions,
   type AttendingSession,
   type ExerciseEntry,
@@ -91,6 +92,7 @@ type Props = {
 
 export function AttendingView({ sessions: fallbackSessions, trainerName, previousWeights }: Props) {
   const router = useRouter()
+  const { mutate } = useSWRConfig()
 
   // SWR: cache attending sessions so navigating back is instant
   const { data: sessions } = useSWR(
@@ -103,6 +105,24 @@ export function AttendingView({ sessions: fallbackSessions, trainerName, previou
   const [weights, setWeights] = useState<Record<string, ExerciseWeights>>(() =>
     Object.fromEntries((sessions ?? []).map(s => [s.id, initWeights(s)]))
   )
+
+  // Auto-save weights to DB (debounced 1s) so progress persists across navigation
+  const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+
+  const debouncedSave = useCallback((sessionId: string, data: ExerciseWeights) => {
+    if (saveTimers.current[sessionId]) clearTimeout(saveTimers.current[sessionId])
+    saveTimers.current[sessionId] = setTimeout(() => {
+      saveExerciseWeights(sessionId, data)
+    }, 1000)
+  }, [])
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    const timers = saveTimers.current
+    return () => {
+      Object.values(timers).forEach(clearTimeout)
+    }
+  }, [])
 
   const initials = getInitials(trainerName)
 
@@ -121,7 +141,9 @@ export function AttendingView({ sessions: fallbackSessions, trainerName, previou
       const newExercises = session.exercises.map((ex, i) =>
         i === exIdx ? { ...ex, sets: newSets } : ex
       )
-      return { ...prev, [sessionId]: { exercises: newExercises } }
+      const updated = { exercises: newExercises }
+      debouncedSave(sessionId, updated)
+      return { ...prev, [sessionId]: updated }
     })
   }
 
@@ -136,7 +158,9 @@ export function AttendingView({ sessions: fallbackSessions, trainerName, previou
       const newExercises = session.exercises.map((ex, i) =>
         i === exIdx ? { ...ex, sets: newSets } : ex
       )
-      return { ...prev, [sessionId]: { exercises: newExercises } }
+      const updated = { exercises: newExercises }
+      debouncedSave(sessionId, updated)
+      return { ...prev, [sessionId]: updated }
     })
   }
 
@@ -179,7 +203,10 @@ export function AttendingView({ sessions: fallbackSessions, trainerName, previou
                   updateSet(session.id, exIdx, setIdx, field, value)
                 }
                 onToggleExercise={(exIdx) => toggleExercise(session.id, exIdx)}
-                onComplete={() => router.refresh()}
+                onComplete={() => {
+                  mutate((key: unknown) => Array.isArray(key) && (key[0] === 'attendance' || key[0] === 'attending-sessions'))
+                  router.refresh()
+                }}
               />
             ))}
           </Accordion.Root>

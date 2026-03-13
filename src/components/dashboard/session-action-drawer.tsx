@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSWRConfig } from 'swr'
 import { HugeiconsIcon, Calendar01Icon, Cancel01Icon } from '@/components/ui/icon'
 import { DatePicker } from '@/components/ui/date-picker'
 import {
@@ -38,6 +39,7 @@ type Props = {
 
 export function SessionActionDrawer({ open, attendance, onClose, onStartSession }: Props) {
   const router = useRouter()
+  const { mutate } = useSWRConfig()
   const [isPending, startTransition] = useTransition()
   const [action, setAction] = useState<'absent' | 'reschedule' | null>(null)
   const [showReschedule, setShowReschedule] = useState(false)
@@ -60,6 +62,7 @@ export function SessionActionDrawer({ open, attendance, onClose, onStartSession 
       await markAbsent(attendance.id)
       setAction(null)
       handleClose()
+      mutate((key: unknown) => Array.isArray(key) && key[0] === 'attendance')
       router.refresh()
     })
   }
@@ -82,6 +85,7 @@ export function SessionActionDrawer({ open, attendance, onClose, onStartSession 
       } else {
         setAction(null)
         handleClose()
+        mutate((key: unknown) => Array.isArray(key) && key[0] === 'attendance')
         router.refresh()
       }
     })

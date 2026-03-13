@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { useSWRConfig } from 'swr'
 import { HugeiconsIcon, Cancel01Icon, PlayIcon, Tick01Icon } from '@/components/ui/icon'
 import {
   BottomDrawer,
@@ -20,6 +22,8 @@ type Props = {
 }
 
 export function SelectWorkoutDrawer({ open, attendance, onClose }: Props) {
+  const router = useRouter()
+  const { mutate } = useSWRConfig()
   const [workouts, setWorkouts] = useState<WorkoutSummary[]>([])
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -37,6 +41,8 @@ export function SelectWorkoutDrawer({ open, attendance, onClose }: Props) {
     startTransition(async () => {
       await startSession(attendance.id, selectedWorkoutId)
       onClose()
+      mutate((key: unknown) => Array.isArray(key) && (key[0] === 'attendance' || key[0] === 'attending-sessions'))
+      router.refresh()
     })
   }
 

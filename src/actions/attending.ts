@@ -134,6 +134,22 @@ export async function getPreviousSessionWeights(
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
+/** Auto-save exercise weights (called on every change, debounced on client) */
+export async function saveExerciseWeights(
+  attendanceId: string,
+  exerciseWeights: ExerciseWeights,
+): Promise<{ error?: string }> {
+  const supabase = await createServerClientUntyped()
+
+  const { error } = await supabase
+    .from('attendance')
+    .update({ exercise_weights: exerciseWeights })
+    .eq('id', attendanceId)
+
+  if (error) return { error: error.message }
+  return {}
+}
+
 export async function completeSession(
   attendanceId: string,
   exerciseWeights: ExerciseWeights,
