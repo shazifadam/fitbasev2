@@ -13,22 +13,26 @@ const loadingMessages = [
   'Almost there...',
 ]
 
+function checkFlag() {
+  if (typeof window === 'undefined') return false
+  return sessionStorage.getItem('fitbase_onboarding_loading') === '1'
+}
+
 export function PostOnboardingLoader() {
-  const [active, setActive] = useState(false)
+  // Initialize as true if the flag exists — prevents a flash of dashboard
+  const [active, setActive] = useState(checkFlag)
   const [msgIndex, setMsgIndex] = useState(0)
 
-  // Check flag on mount — runs once when the dashboard page hydrates
+  // Clear flag and set dismiss timer on mount
   useEffect(() => {
-    if (sessionStorage.getItem('fitbase_onboarding_loading') === '1') {
-      setActive(true)
-      sessionStorage.removeItem('fitbase_onboarding_loading')
+    if (!active) return
+    sessionStorage.removeItem('fitbase_onboarding_loading')
 
-      // Show all messages through "Stretching the spreadsheets..." then dismiss
-      // 4 messages × 1.8s = 7.2s
-      const timer = setTimeout(() => setActive(false), 7200)
-      return () => clearTimeout(timer)
-    }
-  }, [])
+    // Show all messages through "Stretching the spreadsheets..." then dismiss
+    // 4 messages × 1.8s = 7.2s
+    const timer = setTimeout(() => setActive(false), 7200)
+    return () => clearTimeout(timer)
+  }, [active])
 
   // Rotate messages
   useEffect(() => {
