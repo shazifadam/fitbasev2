@@ -23,8 +23,9 @@ export function PostOnboardingLoader() {
       setActive(true)
       sessionStorage.removeItem('fitbase_onboarding_loading')
 
-      // Dismiss after the page has fully painted + a short buffer
-      const timer = setTimeout(() => setActive(false), 2500)
+      // Show all messages through "Stretching the spreadsheets..." then dismiss
+      // 4 messages × 1.8s = 7.2s
+      const timer = setTimeout(() => setActive(false), 7200)
       return () => clearTimeout(timer)
     }
   }, [])
