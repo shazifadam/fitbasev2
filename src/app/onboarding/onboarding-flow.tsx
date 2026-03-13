@@ -99,8 +99,9 @@ export function OnboardingFlow({ trainerName }: Props) {
         await supabase.auth.refreshSession()
         // Small delay so the loading messages feel intentional
         await new Promise(r => setTimeout(r, 3000))
-        // Full navigation to ensure middleware reads the updated cookie
-        window.location.href = '/dashboard'
+        // Full navigation — ob=1 bypasses middleware onboarding check
+        // in case the refreshed JWT cookie hasn't propagated yet
+        window.location.href = '/dashboard?ob=1'
       })
     }
   }

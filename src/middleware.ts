@@ -47,7 +47,9 @@ export async function middleware(request: NextRequest) {
   }
 
   // Onboarding redirect — read onboarding_completed from JWT claim (no DB call)
-  if (user) {
+  // The ?ob=1 param is set after completing onboarding — skip the check so the
+  // redirect lands even if the refreshed JWT cookie hasn't propagated yet.
+  if (user && request.nextUrl.searchParams.get('ob') !== '1') {
     let onboardingCompleted = true // default to true (safe fallback)
     try {
       const { data: { session } } = await supabase.auth.getSession()
