@@ -146,9 +146,10 @@ function AttendanceDotGrid({ attendance, clientId }: { attendance: AttendanceHis
   const row1 = recent.slice(0, 7)
   const row2 = recent.slice(7, 14)
 
-  function dotColor(status: string | null): string {
-    if (status === 'attended') return 'bg-success-600'
-    if (status === 'missed') return 'bg-danger-600'
+  function dotStyle(status: string | null): string {
+    if (status === 'attended') return 'bg-[#16a34a]'
+    if (status === 'missed') return 'bg-[#db5625]'
+    if (status === 'rescheduled') return 'border-[1.5px] border-amber-500'
     return 'bg-neutral-300'
   }
 
@@ -162,7 +163,7 @@ function AttendanceDotGrid({ attendance, clientId }: { attendance: AttendanceHis
       <div className="flex flex-col gap-2">
         <div className="flex justify-center gap-2">
           {row1.map((r, i) => (
-            <div key={i} className={`h-3.5 w-3.5 rounded-full ${dotColor(r.status)}`} />
+            <div key={i} className={`h-3.5 w-3.5 rounded-full ${dotStyle(r.status)}`} />
           ))}
           {Array.from({ length: Math.max(0, 7 - row1.length) }).map((_, i) => (
             <div key={`p1-${i}`} className="h-3.5 w-3.5 rounded-full bg-neutral-200" />
@@ -170,7 +171,7 @@ function AttendanceDotGrid({ attendance, clientId }: { attendance: AttendanceHis
         </div>
         <div className="flex justify-center gap-2">
           {row2.map((r, i) => (
-            <div key={i} className={`h-3.5 w-3.5 rounded-full ${dotColor(r.status)}`} />
+            <div key={i} className={`h-3.5 w-3.5 rounded-full ${dotStyle(r.status)}`} />
           ))}
           {Array.from({ length: Math.max(0, 7 - row2.length) }).map((_, i) => (
             <div key={`p2-${i}`} className="h-3.5 w-3.5 rounded-full bg-neutral-200" />
@@ -180,12 +181,16 @@ function AttendanceDotGrid({ attendance, clientId }: { attendance: AttendanceHis
 
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-success-600" />
+          <div className="h-2.5 w-2.5 rounded-full bg-[#16a34a]" />
           <span className="text-[12px] font-normal text-neutral-500">Attended</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-danger-600" />
+          <div className="h-2.5 w-2.5 rounded-full bg-[#db5625]" />
           <span className="text-[12px] font-normal text-neutral-500">Missed</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-full border-[1.5px] border-amber-500" />
+          <span className="text-[12px] font-normal text-neutral-500">Rescheduled</span>
         </div>
       </div>
     </div>
@@ -321,7 +326,7 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">
-      <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
+      <div className="flex flex-col gap-6 px-4 pt-12 pb-6">
 
         {/* Back link */}
         <button

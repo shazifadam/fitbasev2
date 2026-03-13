@@ -39,7 +39,7 @@ export function PaymentHistoryView({ data }: Props) {
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">
-      <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
+      <div className="flex flex-col gap-6 px-4 pt-12 pb-6">
 
         {/* Header */}
         <button onClick={() => router.back()} className="flex items-center gap-2 self-start -ml-2 px-2 py-2 rounded-base active:bg-neutral-200">

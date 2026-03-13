@@ -193,7 +193,6 @@ export async function getClientAttendance(clientId: string): Promise<AttendanceH
     .select('id, scheduled_date, scheduled_time, status, session_started_at, session_ended_at')
     .eq('client_id', clientId)
     .order('scheduled_date', { ascending: false })
-    .limit(20)
 
   if (error) return []
   return (data ?? []) as AttendanceHistoryRow[]

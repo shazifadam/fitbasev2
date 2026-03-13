@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function ClientDetailLoading() {
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">
-      <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
+      <div className="flex flex-col gap-6 px-4 pt-12 pb-6">
         {/* Back */}
         <Skeleton className="h-4 w-28" />
 

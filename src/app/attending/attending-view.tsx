@@ -106,7 +106,7 @@ export function AttendingView({ sessions, trainerName }: Props) {
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-32">
-      <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
+      <div className="flex flex-col gap-6 px-4 pt-12 pb-6">
 
         {/* Header */}
         <div className="flex items-center justify-between">

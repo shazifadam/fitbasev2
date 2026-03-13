@@ -10,6 +10,10 @@
     @apply border-neutral-200;
   }
 
+  html {
+    font-size: 17px;
+  }
+
   html,
   body {
     @apply bg-neutral-100 text-neutral-950 font-sans font-normal antialiased;

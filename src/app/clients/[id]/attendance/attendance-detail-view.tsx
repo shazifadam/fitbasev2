@@ -27,12 +27,13 @@ const MONTH_NAMES = [
 
 const DAY_HEADERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-function statusColor(status: string | null): string {
-  if (status === 'attended') return 'bg-success-600 text-white'
-  if (status === 'missed') return 'bg-danger-600 text-white'
-  if (status === 'attending') return 'bg-warning-500 text-white'
-  if (status === 'rescheduled') return 'bg-neutral-400 text-white'
-  return 'bg-neutral-200 text-neutral-600' // scheduled
+function statusStyle(status: string | null): { className: string; style?: React.CSSProperties } {
+  if (status === 'attended') return { className: 'bg-[#16a34a] text-white font-medium' }
+  if (status === 'missed') return { className: 'bg-[#db5625] text-white font-medium' }
+  if (status === 'attending') return { className: 'bg-warning-500 text-white font-medium' }
+  if (status === 'rescheduled') return { className: 'border-2 border-amber-500 text-amber-700' }
+  if (status === 'scheduled') return { className: 'border-[1.5px] border-neutral-300 text-neutral-500' }
+  return { className: '' }
 }
 
 function statusBadge(status: string | null): { label: string; cls: string } {
@@ -125,12 +126,11 @@ function CalendarGrid({
           if (day === null) return <div key={i} className="h-9" />
           const status = dateStatus.get(day)
           const hasStatus = status !== undefined
+          const ss = hasStatus ? statusStyle(status) : { className: 'text-neutral-400' }
           return (
             <div
               key={i}
-              className={`flex h-9 w-9 items-center justify-center rounded-full mx-auto text-[13px] font-normal ${
-                hasStatus ? statusColor(status) : ''
-              }`}
+              className={`flex h-9 w-9 items-center justify-center rounded-full mx-auto text-[13px] font-normal ${ss.className}`}
             >
               {day}
             </div>
@@ -139,22 +139,22 @@ function CalendarGrid({
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mt-1">
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-success-600" />
+          <div className="h-2.5 w-2.5 rounded-full bg-[#16a34a]" />
           <span className="text-[11px] font-normal text-neutral-500">Attended</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-danger-600" />
+          <div className="h-2.5 w-2.5 rounded-full bg-[#db5625]" />
           <span className="text-[11px] font-normal text-neutral-500">Missed</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-neutral-200" />
-          <span className="text-[11px] font-normal text-neutral-500">Scheduled</span>
+          <div className="h-2.5 w-2.5 rounded-full border-[1.5px] border-amber-500" />
+          <span className="text-[11px] font-normal text-neutral-500">Rescheduled</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-neutral-400" />
-          <span className="text-[11px] font-normal text-neutral-500">Rescheduled</span>
+          <div className="h-2.5 w-2.5 rounded-full border-[1.5px] border-neutral-300" />
+          <span className="text-[11px] font-normal text-neutral-500">Scheduled</span>
         </div>
       </div>
     </div>
@@ -346,7 +346,7 @@ export function AttendanceDetailView({ client, attendance, year, month }: Props)
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">
-      <div className="flex flex-col gap-5 px-6 pt-12 pb-6">
+      <div className="flex flex-col gap-5 px-4 pt-12 pb-6">
 
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -424,14 +424,14 @@ export function AttendanceDetailView({ client, attendance, year, month }: Props)
 
         {/* Month navigation */}
         {!filterActive && (
-          <div className="flex items-center justify-between">
-            <button onClick={handlePrevMonth} className="p-1">
+          <div className="flex items-center justify-between rounded-card bg-white border border-neutral-200 px-4 py-3">
+            <button onClick={handlePrevMonth} className="flex items-center justify-center h-9 w-9 rounded-base active:bg-neutral-100">
               <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-600" />
             </button>
             <span className="text-base font-medium text-neutral-950">
               {MONTH_NAMES[month - 1]} {year}
             </span>
-            <button onClick={handleNextMonth} className="p-1">
+            <button onClick={handleNextMonth} className="flex items-center justify-center h-9 w-9 rounded-base active:bg-neutral-100">
               <HugeiconsIcon icon={ArrowRight01Icon} size={18} color="currentColor" className="text-neutral-600" />
             </button>
           </div>
@@ -448,17 +448,17 @@ export function AttendanceDetailView({ client, attendance, year, month }: Props)
             <span className="text-base font-medium text-neutral-950">Monthly Summary</span>
           )}
           <div className="flex gap-2">
-            <div className="flex flex-1 flex-col items-center gap-0.5 rounded-base bg-white border border-neutral-200 py-3">
-              <span className="text-[22px] font-medium text-success-600">{stats.attended}</span>
+            <div className="flex flex-1 flex-col items-center gap-0.5 rounded-base bg-green-50 border border-green-200 py-3">
+              <span className="text-[22px] font-medium text-[#16a34a]">{stats.attended}</span>
               <span className="text-[12px] font-normal text-neutral-500">Attended</span>
             </div>
-            <div className="flex flex-1 flex-col items-center gap-0.5 rounded-base bg-white border border-neutral-200 py-3">
-              <span className={`text-[22px] font-medium ${stats.missed > 0 ? 'text-danger-600' : 'text-neutral-950'}`}>
+            <div className="flex flex-1 flex-col items-center gap-0.5 rounded-base bg-red-50 border border-red-200 py-3">
+              <span className={`text-[22px] font-medium ${stats.missed > 0 ? 'text-[#db5625]' : 'text-neutral-950'}`}>
                 {stats.missed}
               </span>
               <span className="text-[12px] font-normal text-neutral-500">Missed</span>
             </div>
-            <div className="flex flex-1 flex-col items-center gap-0.5 rounded-base bg-white border border-neutral-200 py-3">
+            <div className="flex flex-1 flex-col items-center gap-0.5 rounded-base bg-neutral-100 border border-neutral-200 py-3">
               <span className="text-[22px] font-medium text-neutral-950">{stats.scheduled}</span>
               <span className="text-[12px] font-normal text-neutral-500">Scheduled</span>
             </div>

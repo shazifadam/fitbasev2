@@ -42,7 +42,7 @@ export function StatsView({ stats, year, month, trainerName }: Props) {
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">
-      <div className="flex flex-col gap-4 px-6 pt-12 pb-6">
+      <div className="flex flex-col gap-4 px-4 pt-12 pb-6">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>

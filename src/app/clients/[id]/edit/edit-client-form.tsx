@@ -129,7 +129,7 @@ export function EditClientForm({ client, tiers }: Props) {
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-8">
-      <div className="flex flex-col gap-6 px-6 pt-12 pb-6">
+      <div className="flex flex-col gap-6 px-4 pt-12 pb-6">
 
         {/* Header */}
         <div className="flex items-center gap-3">

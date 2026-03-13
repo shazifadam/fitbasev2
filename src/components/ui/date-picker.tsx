@@ -127,7 +127,7 @@ function DatePicker({
                 'inline-flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-normal text-neutral-950 mx-auto',
                 'hover:bg-neutral-100 focus:outline-none',
               ),
-              selected: 'bg-neutral-800 text-white hover:bg-neutral-800',
+              selected: 'ring-2 ring-inset ring-neutral-800 text-neutral-950 hover:bg-neutral-100',
               today: 'font-medium',
               outside: 'text-neutral-300',
               disabled: 'text-neutral-200 cursor-not-allowed hover:bg-transparent',
