@@ -326,19 +326,21 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">
-      <div className="flex flex-col gap-6 px-4 pt-6 pb-6">
+
+      {/* ── White top section: client info ── */}
+      <div className="bg-white flex flex-col gap-2.5 px-4 pt-6 pb-6">
 
         {/* Back link */}
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 self-start -ml-2 px-2 py-2 rounded-base active:bg-neutral-200"
+          className="flex items-center gap-1.5 self-start -ml-2 px-2 py-2 rounded-base active:bg-neutral-100"
         >
-          <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="currentColor" className="text-neutral-500" />
-          <span className="text-[14px] font-normal text-neutral-500">Back to Clients</span>
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} color="currentColor" className="text-neutral-500" />
+          <span className="text-[13px] font-normal text-neutral-500">Back to Clients</span>
         </button>
 
         {/* Name + menu */}
-        <div className="flex items-center justify-between -mt-2">
+        <div className="flex items-center justify-between">
           <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px]">
             {client.name}
           </h1>
@@ -352,19 +354,23 @@ export function ClientDetailView({ client, attendance, payment, workouts, tierAm
         </div>
 
         {/* Programs */}
-        <span className="text-[14px] font-normal text-neutral-500 -mt-3">
+        <span className="text-[14px] font-normal text-neutral-500">
           {formatPrograms(client.training_programs)}
         </span>
 
         {/* Meta row: badge + last session */}
-        <div className="flex items-center gap-3 -mt-2">
-          <span className="rounded-base bg-neutral-200 px-2 py-1 text-[12px] font-medium text-neutral-950">
+        <div className="flex items-center gap-3">
+          <span className="rounded-base bg-neutral-100 px-2 py-1 text-[12px] font-medium text-neutral-950">
             {SCHEDULE_LABELS[client.schedule_set] ?? client.schedule_set}
           </span>
           <span className="text-[13px] font-normal text-neutral-500">
             {lastSessionAgo(attendance)}
           </span>
         </div>
+      </div>
+
+      {/* ── Content section: grey background ── */}
+      <div className="flex flex-col gap-6 px-4 pt-4 pb-6">
 
         {/* Payment Status Card — shown at TOP if overdue */}
         {payment.isOverdue && <PaymentCard payment={payment} clientId={client.id} />}

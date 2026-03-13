@@ -101,16 +101,29 @@ export function AttendingView({ sessions, trainerName, previousWeights }: Props)
     sessionId: string,
     exIdx: number,
     setIdx: number,
-    field: 'weight_kg' | 'reps' | 'completed',
-    value: number | boolean | null,
+    field: 'weight_kg' | 'reps',
+    value: number | null,
   ) {
     setWeights(prev => {
       const session = prev[sessionId]
       const newSets = session.exercises[exIdx].sets.map((s, i) =>
-        i === setIdx
-          ? { ...s, [field]: value }
-          : s
+        i === setIdx ? { ...s, [field]: value } : s
       )
+      const newExercises = session.exercises.map((ex, i) =>
+        i === exIdx ? { ...ex, sets: newSets } : ex
+      )
+      return { ...prev, [sessionId]: { exercises: newExercises } }
+    })
+  }
+
+  function toggleExercise(sessionId: string, exIdx: number) {
+    setWeights(prev => {
+      const session = prev[sessionId]
+      const allCompleted = session.exercises[exIdx].sets.every(s => s.completed)
+      const newSets = session.exercises[exIdx].sets.map(s => ({
+        ...s,
+        completed: !allCompleted,
+      }))
       const newExercises = session.exercises.map((ex, i) =>
         i === exIdx ? { ...ex, sets: newSets } : ex
       )
@@ -156,6 +169,7 @@ export function AttendingView({ sessions, trainerName, previousWeights }: Props)
                 onUpdateSet={(exIdx, setIdx, field, value) =>
                   updateSet(session.id, exIdx, setIdx, field, value)
                 }
+                onToggleExercise={(exIdx) => toggleExercise(session.id, exIdx)}
                 onComplete={() => router.refresh()}
               />
             ))}
@@ -176,13 +190,14 @@ type SessionItemProps = {
   onUpdateSet: (
     exIdx: number,
     setIdx: number,
-    field: 'weight_kg' | 'reps' | 'completed',
-    value: number | boolean | null,
+    field: 'weight_kg' | 'reps',
+    value: number | null,
   ) => void
+  onToggleExercise: (exIdx: number) => void
   onComplete: () => void
 }
 
-function SessionItem({ session, sessionWeights, prevWeights, onUpdateSet, onComplete }: SessionItemProps) {
+function SessionItem({ session, sessionWeights, prevWeights, onUpdateSet, onToggleExercise, onComplete }: SessionItemProps) {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
@@ -192,7 +207,6 @@ function SessionItem({ session, sessionWeights, prevWeights, onUpdateSet, onComp
   const elapsed = useElapsed(session.session_started_at)
 
   function handleComplete() {
-    // Check if any set is marked as completed
     const anyCompleted = sessionWeights.exercises.some(ex =>
       ex.sets.some(s => s.completed)
     )
@@ -251,28 +265,50 @@ function SessionItem({ session, sessionWeights, prevWeights, onUpdateSet, onComp
           )}
 
           {/* Exercises */}
-          {sessionWeights.exercises.map((ex, exIdx) => (
-            <div key={ex.exercise_id} className="flex flex-col gap-2 pt-4">
-              <span className="text-[14px] font-medium text-neutral-950">{ex.exercise_name}</span>
-
-              {/* Set rows */}
-              <div className="flex flex-col gap-1 min-w-0">
-                {/* Column headers */}
-                <div className="grid grid-cols-[28px_1fr_1fr_28px] gap-1.5 px-1">
-                  <span className="text-[11px] font-normal text-neutral-400 text-center">Set</span>
-                  <span className="text-[11px] font-normal text-neutral-400 text-center">kg</span>
-                  <span className="text-[11px] font-normal text-neutral-400 text-center">Reps</span>
-                  <span className="text-[11px] font-normal text-neutral-400 text-center">✓</span>
+          {sessionWeights.exercises.map((ex, exIdx) => {
+            const allCompleted = ex.sets.every(s => s.completed)
+            return (
+              <div key={ex.exercise_id} className="flex flex-col gap-2 pt-4">
+                {/* Exercise name + checkbox */}
+                <div className="flex items-center justify-between">
+                  <span className="text-[14px] font-medium text-neutral-950">{ex.exercise_name}</span>
+                  <button
+                    type="button"
+                    onClick={() => onToggleExercise(exIdx)}
+                    className={cn(
+                      'flex h-7 w-7 items-center justify-center rounded-full shrink-0 transition-colors',
+                      allCompleted
+                        ? 'bg-neutral-800'
+                        : 'border-[1.5px] border-neutral-300'
+                    )}
+                  >
+                    {allCompleted && (
+                      <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} color="white" />
+                    )}
+                  </button>
                 </div>
 
-                {ex.sets.map((set, setIdx) => {
-                  const prev = getPrevSet(prevWeights, ex.exercise_id, set.set_number)
-                  return (
-                    <div key={set.set_number} className="flex flex-col gap-0.5">
+                {/* Set rows */}
+                <div className="flex flex-col gap-1 min-w-0">
+                  {/* Column headers: Set | Prev | kg | Reps */}
+                  <div className="grid grid-cols-[28px_1fr_1fr_1fr] gap-1.5 px-1">
+                    <span className="text-[11px] font-normal text-neutral-400 text-center">Set</span>
+                    <span className="text-[11px] font-normal text-neutral-400 text-center">Prev</span>
+                    <span className="text-[11px] font-normal text-neutral-400 text-center">kg</span>
+                    <span className="text-[11px] font-normal text-neutral-400 text-center">Reps</span>
+                  </div>
+
+                  {ex.sets.map((set, setIdx) => {
+                    const prev = getPrevSet(prevWeights, ex.exercise_id, set.set_number)
+                    const prevLabel = prev
+                      ? [prev.weight_kg != null ? `${prev.weight_kg}kg` : null, prev.reps != null ? `×${prev.reps}` : null].filter(Boolean).join(' ')
+                      : '—'
+                    return (
                       <div
+                        key={set.set_number}
                         className={cn(
-                          'grid grid-cols-[28px_1fr_1fr_28px] gap-1.5 items-center rounded-base px-1 py-1',
-                          set.completed ? 'bg-neutral-50' : ''
+                          'grid grid-cols-[28px_1fr_1fr_1fr] gap-1.5 items-center rounded-base px-1 py-1',
+                          allCompleted ? 'bg-neutral-50' : ''
                         )}
                       >
                         {/* Set number */}
@@ -280,11 +316,16 @@ function SessionItem({ session, sessionWeights, prevWeights, onUpdateSet, onComp
                           {set.set_number}
                         </span>
 
-                        {/* Weight */}
+                        {/* Previous weight */}
+                        <span className="text-[12px] font-normal text-neutral-400 text-center truncate">
+                          {prevLabel}
+                        </span>
+
+                        {/* Weight input */}
                         <input
                           type="number"
                           inputMode="decimal"
-                          placeholder={prev?.weight_kg != null ? String(prev.weight_kg) : '—'}
+                          placeholder="—"
                           value={set.weight_kg ?? ''}
                           onChange={e =>
                             onUpdateSet(exIdx, setIdx, 'weight_kg',
@@ -293,11 +334,11 @@ function SessionItem({ session, sessionWeights, prevWeights, onUpdateSet, onComp
                           className="h-9 w-full min-w-0 rounded-base border border-neutral-200 px-1 text-center text-[13px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
                         />
 
-                        {/* Reps */}
+                        {/* Reps input */}
                         <input
                           type="number"
                           inputMode="numeric"
-                          placeholder={prev?.reps != null ? String(prev.reps) : '—'}
+                          placeholder="—"
                           value={set.reps ?? ''}
                           onChange={e =>
                             onUpdateSet(exIdx, setIdx, 'reps',
@@ -305,43 +346,13 @@ function SessionItem({ session, sessionWeights, prevWeights, onUpdateSet, onComp
                           }
                           className="h-9 w-full min-w-0 rounded-base border border-neutral-200 px-1 text-center text-[13px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
                         />
-
-                        {/* Completed toggle */}
-                        <button
-                          type="button"
-                          onClick={() => onUpdateSet(exIdx, setIdx, 'completed', !set.completed)}
-                          className={cn(
-                            'flex h-7 w-7 items-center justify-center rounded-full mx-auto transition-colors',
-                            set.completed
-                              ? 'bg-neutral-800'
-                              : 'border-[1.5px] border-neutral-300'
-                          )}
-                        >
-                          {set.completed && (
-                            <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} color="white" />
-                          )}
-                        </button>
                       </div>
-
-                      {/* Previous weights reference */}
-                      {prev && (prev.weight_kg != null || prev.reps != null) && (
-                        <div className="grid grid-cols-[28px_1fr_1fr_28px] gap-1.5 px-1">
-                          <span />
-                          <span className="text-[10px] font-normal text-neutral-400 text-center">
-                            {prev.weight_kg != null ? `Last: ${prev.weight_kg}` : ''}
-                          </span>
-                          <span className="text-[10px] font-normal text-neutral-400 text-center">
-                            {prev.reps != null ? `Last: ${prev.reps}` : ''}
-                          </span>
-                          <span />
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
 
           {/* Error */}
           {error && (
