@@ -6,10 +6,7 @@ import { HugeiconsIcon, ArrowLeft01Icon } from '@/components/ui/icon'
 import { SelectInput } from '@/components/ui/select-input'
 import { Spinner } from '@/components/ui/spinner'
 import { updateClient, type ClientDetail, type TierRow } from '@/actions/clients'
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const TRAINING_PROGRAMS = ['Strength', 'Body-Trans', 'Cardio', 'HIIT']
+import type { TrainingProgram } from '@/actions/training-programs'
 
 const ALL_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -34,9 +31,10 @@ const DEFAULT_TIME = '06:00'
 type Props = {
   client: ClientDetail
   tiers: TierRow[]
+  trainingPrograms: TrainingProgram[]
 }
 
-export function EditClientForm({ client, tiers }: Props) {
+export function EditClientForm({ client, tiers, trainingPrograms }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -129,7 +127,7 @@ export function EditClientForm({ client, tiers }: Props) {
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-8">
-      <div className="flex flex-col gap-6 px-4 pt-12 pb-6">
+      <div className="flex flex-col gap-6 px-4 pt-6 pb-6">
 
         {/* Header */}
         <div className="flex items-center gap-3">
@@ -173,7 +171,7 @@ export function EditClientForm({ client, tiers }: Props) {
           <div className="flex flex-col gap-2">
             <label className="text-[14px] font-medium text-neutral-950">Training Programs</label>
             <div className="flex flex-wrap gap-2">
-              {TRAINING_PROGRAMS.map(program => {
+              {trainingPrograms.map(({ name: program }) => {
                 const selected = programs.includes(program)
                 return (
                   <button

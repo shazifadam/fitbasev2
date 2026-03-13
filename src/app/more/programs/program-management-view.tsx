@@ -14,29 +14,31 @@ import {
   BottomDrawer,
   BottomDrawerContent,
 } from '@/components/ui/bottom-drawer'
-import { createTier, updateTier, deleteTier } from '@/actions/tiers'
-import type { TierDetail } from '@/actions/tiers'
+import {
+  createTrainingProgram,
+  updateTrainingProgram,
+  deleteTrainingProgram,
+} from '@/actions/training-programs'
+import type { TrainingProgram } from '@/actions/training-programs'
 import { Spinner } from '@/components/ui/spinner'
 
-// ─── Tier Drawer ──────────────────────────────────────────────────────────────
+// ─── Program Drawer ──────────────────────────────────────────────────────────
 
-function TierDrawer({
+function ProgramDrawer({
   open,
   onClose,
-  editTier,
+  editProgram,
 }: {
   open: boolean
   onClose: () => void
-  editTier: TierDetail | null
+  editProgram: TrainingProgram | null
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [name, setName] = useState(editTier?.name ?? '')
-  const [amount, setAmount] = useState(editTier?.amount?.toString() ?? '')
+  const [name, setName] = useState(editProgram?.name ?? '')
   const [error, setError] = useState<string | null>(null)
 
-  // Reset form when drawer opens with new data
-  const isEdit = !!editTier
+  const isEdit = !!editProgram
 
   function handleClose() {
     setError(null)
@@ -44,15 +46,13 @@ function TierDrawer({
   }
 
   function handleSubmit() {
-    if (!name.trim()) { setError('Tier name is required'); return }
-    const parsedAmount = parseFloat(amount)
-    if (isNaN(parsedAmount) || parsedAmount < 0) { setError('Enter a valid price'); return }
+    if (!name.trim()) { setError('Program name is required'); return }
 
     setError(null)
     startTransition(async () => {
       const result = isEdit
-        ? await updateTier(editTier.id, { name: name.trim(), amount: parsedAmount })
-        : await createTier({ name: name.trim(), amount: parsedAmount })
+        ? await updateTrainingProgram(editProgram.id, name.trim())
+        : await createTrainingProgram(name.trim())
 
       if (result.error) {
         setError(result.error)
@@ -70,7 +70,7 @@ function TierDrawer({
 
           <div className="flex items-center justify-between">
             <span className="text-xl font-medium text-neutral-950">
-              {isEdit ? 'Edit Tier' : 'Create New Tier'}
+              {isEdit ? 'Edit Program' : 'Add New Program'}
             </span>
             <button onClick={handleClose} className="text-neutral-400">
               <HugeiconsIcon icon={Cancel01Icon} size={24} color="currentColor" />
@@ -78,25 +78,12 @@ function TierDrawer({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-[14px] font-normal text-neutral-950">Tier Name</span>
+            <span className="text-[14px] font-normal text-neutral-950">Program Name</span>
             <input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="e.g. Premium"
-              className="h-11 rounded-base border border-neutral-200 px-3 text-[15px] font-normal text-neutral-950 bg-white outline-none focus:border-neutral-800 placeholder:text-neutral-400"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[14px] font-normal text-neutral-950">Price (MVR)</span>
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              value={amount}
-              onChange={e => setAmount(e.target.value)}
-              placeholder="e.g. 40.00"
+              placeholder="e.g. Strength"
               className="h-11 rounded-base border border-neutral-200 px-3 text-[15px] font-normal text-neutral-950 bg-white outline-none focus:border-neutral-800 placeholder:text-neutral-400"
             />
           </div>
@@ -111,8 +98,8 @@ function TierDrawer({
             className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
           >
             {isPending
-              ? <><Spinner className="text-white" /> {isEdit ? 'Saving…' : 'Creating…'}</>
-              : (isEdit ? 'Save Changes' : 'Create Tier')
+              ? <><Spinner className="text-white" /> {isEdit ? 'Saving…' : 'Adding…'}</>
+              : (isEdit ? 'Save Changes' : 'Add Program')
             }
           </button>
 
@@ -132,36 +119,36 @@ function TierDrawer({
 // ─── Component ────────────────────────────────────────────────────────────────
 
 type Props = {
-  tiers: TierDetail[]
+  programs: TrainingProgram[]
 }
 
-export function TierManagementView({ tiers }: Props) {
+export function ProgramManagementView({ programs }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [editingTier, setEditingTier] = useState<TierDetail | null>(null)
+  const [editingProgram, setEditingProgram] = useState<TrainingProgram | null>(null)
 
   function handleCreate() {
-    setEditingTier(null)
+    setEditingProgram(null)
     setDrawerOpen(true)
   }
 
-  function handleEdit(tier: TierDetail) {
-    setEditingTier(tier)
+  function handleEdit(program: TrainingProgram) {
+    setEditingProgram(program)
     setDrawerOpen(true)
   }
 
-  function handleDelete(tier: TierDetail) {
-    if (!confirm(`Delete "${tier.name}" tier? Clients on this tier will have no tier assigned.`)) return
+  function handleDelete(program: TrainingProgram) {
+    if (!confirm(`Delete "${program.name}"? Clients using this program tag will keep it in their records.`)) return
     startTransition(async () => {
-      await deleteTier(tier.id)
+      await deleteTrainingProgram(program.id)
       router.refresh()
     })
   }
 
   function handleDrawerClose() {
     setDrawerOpen(false)
-    setEditingTier(null)
+    setEditingProgram(null)
   }
 
   return (
@@ -175,42 +162,37 @@ export function TierManagementView({ tiers }: Props) {
         </button>
 
         <h1 className="text-[28px] font-medium text-neutral-950 leading-tight tracking-[-0.5px] -mt-2">
-          Tier Management
+          Training Programs
         </h1>
 
-        {/* Tier count */}
+        {/* Count */}
         <div className="flex items-center justify-between -mt-2">
           <span className="text-[11px] font-normal text-neutral-400 uppercase tracking-wider">
-            Your Tiers
+            Your Programs
           </span>
           <span className="text-[13px] font-normal text-neutral-500">
-            {tiers.length} tiers
+            {programs.length} programs
           </span>
         </div>
 
-        {/* Tier List */}
-        {tiers.length === 0 ? (
+        {/* Program List */}
+        {programs.length === 0 ? (
           <div className="flex items-center justify-center py-12">
-            <span className="text-[14px] font-normal text-neutral-400">No tiers created yet</span>
+            <span className="text-[14px] font-normal text-neutral-400">No programs created yet</span>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            {tiers.map(tier => (
+            {programs.map(program => (
               <div
-                key={tier.id}
+                key={program.id}
                 className="flex items-center justify-between rounded-base bg-white border border-neutral-200 p-4"
               >
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[15px] font-medium text-neutral-950">{tier.name}</span>
-                  <span className="text-[13px] font-normal text-neutral-500">
-                    MVR {Number(tier.amount).toFixed(2)} / month
-                  </span>
-                </div>
+                <span className="text-[15px] font-medium text-neutral-950">{program.name}</span>
                 <div className="flex items-center gap-3">
-                  <button onClick={() => handleEdit(tier)} className="text-neutral-400">
+                  <button onClick={() => handleEdit(program)} className="text-neutral-400">
                     <HugeiconsIcon icon={PencilEdit01Icon} size={18} color="currentColor" />
                   </button>
-                  <button onClick={() => handleDelete(tier)} className="text-danger-600" disabled={isPending}>
+                  <button onClick={() => handleDelete(program)} className="text-danger-600" disabled={isPending}>
                     <HugeiconsIcon icon={Delete01Icon} size={18} color="currentColor" />
                   </button>
                 </div>
@@ -219,23 +201,23 @@ export function TierManagementView({ tiers }: Props) {
           </div>
         )}
 
-        {/* Add Tier Button */}
+        {/* Add Program Button */}
         <button
           onClick={handleCreate}
           className="flex h-[52px] w-full items-center justify-center gap-2 rounded-base bg-neutral-800 text-base font-normal text-white"
         >
           <HugeiconsIcon icon={Add01Icon} size={18} color="currentColor" />
-          Add New Tier
+          Add New Program
         </button>
 
       </div>
 
-      {/* Create / Edit Tier Drawer */}
+      {/* Create / Edit Program Drawer */}
       {drawerOpen && (
-        <TierDrawer
+        <ProgramDrawer
           open={drawerOpen}
           onClose={handleDrawerClose}
-          editTier={editingTier}
+          editProgram={editingProgram}
         />
       )}
     </main>

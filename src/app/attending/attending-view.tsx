@@ -45,6 +45,19 @@ function initWeights(session: AttendingSession): ExerciseWeights {
   return { exercises: [] }
 }
 
+/** Look up previous weight/reps for a specific exercise + set from previous session data */
+function getPrevSet(
+  prevWeights: ExerciseWeights | null,
+  exerciseId: string,
+  setNumber: number,
+): { weight_kg: number | null; reps: number | null } | null {
+  if (!prevWeights) return null
+  const ex = prevWeights.exercises.find(e => e.exercise_id === exerciseId)
+  if (!ex) return null
+  const set = ex.sets.find(s => s.set_number === setNumber)
+  return set ? { weight_kg: set.weight_kg, reps: set.reps } : null
+}
+
 // ─── Elapsed Timer Hook ───────────────────────────────────────────────────────
 
 function useElapsed(startIso: string | null): string {
@@ -71,9 +84,10 @@ function useElapsed(startIso: string | null): string {
 type Props = {
   sessions: AttendingSession[]
   trainerName: string
+  previousWeights: Record<string, ExerciseWeights | null>
 }
 
-export function AttendingView({ sessions, trainerName }: Props) {
+export function AttendingView({ sessions, trainerName, previousWeights }: Props) {
   const router = useRouter()
 
   // weights[attendanceId] = mutable ExerciseWeights state
@@ -106,7 +120,7 @@ export function AttendingView({ sessions, trainerName }: Props) {
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-32">
-      <div className="flex flex-col gap-6 px-4 pt-12 pb-6">
+      <div className="flex flex-col gap-6 px-4 pt-6 pb-6">
 
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -138,6 +152,7 @@ export function AttendingView({ sessions, trainerName }: Props) {
                 key={session.id}
                 session={session}
                 sessionWeights={weights[session.id] ?? { exercises: [] }}
+                prevWeights={previousWeights[session.id] ?? null}
                 onUpdateSet={(exIdx, setIdx, field, value) =>
                   updateSet(session.id, exIdx, setIdx, field, value)
                 }
@@ -157,6 +172,7 @@ export function AttendingView({ sessions, trainerName }: Props) {
 type SessionItemProps = {
   session: AttendingSession
   sessionWeights: ExerciseWeights
+  prevWeights: ExerciseWeights | null
   onUpdateSet: (
     exIdx: number,
     setIdx: number,
@@ -166,7 +182,7 @@ type SessionItemProps = {
   onComplete: () => void
 }
 
-function SessionItem({ session, sessionWeights, onUpdateSet, onComplete }: SessionItemProps) {
+function SessionItem({ session, sessionWeights, prevWeights, onUpdateSet, onComplete }: SessionItemProps) {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
@@ -176,6 +192,17 @@ function SessionItem({ session, sessionWeights, onUpdateSet, onComplete }: Sessi
   const elapsed = useElapsed(session.session_started_at)
 
   function handleComplete() {
+    // Check if any set is marked as completed
+    const anyCompleted = sessionWeights.exercises.some(ex =>
+      ex.sets.some(s => s.completed)
+    )
+
+    if (!anyCompleted) {
+      if (!confirm('No exercises are marked as complete. Are you sure you want to complete all exercises and mark this session as complete?')) {
+        return
+      }
+    }
+
     setError(null)
     startTransition(async () => {
       const result = await completeSession(session.id, sessionWeights)
@@ -238,62 +265,80 @@ function SessionItem({ session, sessionWeights, onUpdateSet, onComplete }: Sessi
                   <span className="text-[11px] font-normal text-neutral-400 text-center">✓</span>
                 </div>
 
-                {ex.sets.map((set, setIdx) => (
-                  <div
-                    key={set.set_number}
-                    className={cn(
-                      'grid grid-cols-[28px_1fr_1fr_28px] gap-1.5 items-center rounded-base px-1 py-1',
-                      set.completed ? 'bg-neutral-50' : ''
-                    )}
-                  >
-                    {/* Set number */}
-                    <span className="text-[13px] font-normal text-neutral-500 text-center">
-                      {set.set_number}
-                    </span>
+                {ex.sets.map((set, setIdx) => {
+                  const prev = getPrevSet(prevWeights, ex.exercise_id, set.set_number)
+                  return (
+                    <div key={set.set_number} className="flex flex-col gap-0.5">
+                      <div
+                        className={cn(
+                          'grid grid-cols-[28px_1fr_1fr_28px] gap-1.5 items-center rounded-base px-1 py-1',
+                          set.completed ? 'bg-neutral-50' : ''
+                        )}
+                      >
+                        {/* Set number */}
+                        <span className="text-[13px] font-normal text-neutral-500 text-center">
+                          {set.set_number}
+                        </span>
 
-                    {/* Weight */}
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      placeholder="—"
-                      value={set.weight_kg ?? ''}
-                      onChange={e =>
-                        onUpdateSet(exIdx, setIdx, 'weight_kg',
-                          e.target.value === '' ? null : parseFloat(e.target.value))
-                      }
-                      className="h-9 w-full min-w-0 rounded-base border border-neutral-200 px-1 text-center text-[13px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
-                    />
+                        {/* Weight */}
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          placeholder={prev?.weight_kg != null ? String(prev.weight_kg) : '—'}
+                          value={set.weight_kg ?? ''}
+                          onChange={e =>
+                            onUpdateSet(exIdx, setIdx, 'weight_kg',
+                              e.target.value === '' ? null : parseFloat(e.target.value))
+                          }
+                          className="h-9 w-full min-w-0 rounded-base border border-neutral-200 px-1 text-center text-[13px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
+                        />
 
-                    {/* Reps */}
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      placeholder="—"
-                      value={set.reps ?? ''}
-                      onChange={e =>
-                        onUpdateSet(exIdx, setIdx, 'reps',
-                          e.target.value === '' ? null : parseInt(e.target.value, 10))
-                      }
-                      className="h-9 w-full min-w-0 rounded-base border border-neutral-200 px-1 text-center text-[13px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
-                    />
+                        {/* Reps */}
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          placeholder={prev?.reps != null ? String(prev.reps) : '—'}
+                          value={set.reps ?? ''}
+                          onChange={e =>
+                            onUpdateSet(exIdx, setIdx, 'reps',
+                              e.target.value === '' ? null : parseInt(e.target.value, 10))
+                          }
+                          className="h-9 w-full min-w-0 rounded-base border border-neutral-200 px-1 text-center text-[13px] font-normal text-neutral-950 outline-none focus:border-neutral-800 bg-white"
+                        />
 
-                    {/* Completed toggle */}
-                    <button
-                      type="button"
-                      onClick={() => onUpdateSet(exIdx, setIdx, 'completed', !set.completed)}
-                      className={cn(
-                        'flex h-7 w-7 items-center justify-center rounded-full mx-auto transition-colors',
-                        set.completed
-                          ? 'bg-neutral-800'
-                          : 'border-[1.5px] border-neutral-300'
+                        {/* Completed toggle */}
+                        <button
+                          type="button"
+                          onClick={() => onUpdateSet(exIdx, setIdx, 'completed', !set.completed)}
+                          className={cn(
+                            'flex h-7 w-7 items-center justify-center rounded-full mx-auto transition-colors',
+                            set.completed
+                              ? 'bg-neutral-800'
+                              : 'border-[1.5px] border-neutral-300'
+                          )}
+                        >
+                          {set.completed && (
+                            <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} color="white" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Previous weights reference */}
+                      {prev && (prev.weight_kg != null || prev.reps != null) && (
+                        <div className="grid grid-cols-[28px_1fr_1fr_28px] gap-1.5 px-1">
+                          <span />
+                          <span className="text-[10px] font-normal text-neutral-400 text-center">
+                            {prev.weight_kg != null ? `Last: ${prev.weight_kg}` : ''}
+                          </span>
+                          <span className="text-[10px] font-normal text-neutral-400 text-center">
+                            {prev.reps != null ? `Last: ${prev.reps}` : ''}
+                          </span>
+                          <span />
+                        </div>
                       )}
-                    >
-                      {set.completed && (
-                        <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} color="white" />
-                      )}
-                    </button>
-                  </div>
-                ))}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           ))}

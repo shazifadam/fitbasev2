@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerClientUntyped } from '@/lib/supabase/server'
+import { createServerClientUntyped, getTrainerId } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -48,14 +48,10 @@ export type AttendingSession = {
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 export async function getAttendingSessions(): Promise<AttendingSession[]> {
+  const trainerId = await getTrainerId()
+  if (!trainerId) return []
+
   const supabase = await createServerClientUntyped()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
-
-  const { data: trainer } = await supabase
-    .from('users').select('id').eq('auth_id', user.id).single()
-  if (!trainer) return []
-
   const today = new Date().toISOString().split('T')[0]
 
   const { data, error } = await supabase
@@ -78,7 +74,7 @@ export async function getAttendingSessions(): Promise<AttendingSession[]> {
       )
     `)
     .eq('status', 'attending')
-    .eq('trainer_id', (trainer as { id: string }).id)
+    .eq('trainer_id', trainerId)
     .eq('scheduled_date', today)
     .order('session_started_at', { ascending: true })
 
@@ -88,6 +84,52 @@ export async function getAttendingSessions(): Promise<AttendingSession[]> {
   }
 
   return (data ?? []) as unknown as AttendingSession[]
+}
+
+/**
+ * Fetch the last attended session's exercise_weights for a client.
+ * If a workoutId is given, tries to match that workout first.
+ */
+export async function getPreviousSessionWeights(
+  clientId: string,
+  workoutId: string | null,
+): Promise<ExerciseWeights | null> {
+  const supabase = await createServerClientUntyped()
+
+  // Try matching same workout first
+  if (workoutId) {
+    const { data } = await supabase
+      .from('attendance')
+      .select('exercise_weights')
+      .eq('client_id', clientId)
+      .eq('session_workout_id', workoutId)
+      .eq('status', 'attended')
+      .not('exercise_weights', 'is', null)
+      .order('scheduled_date', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (data?.exercise_weights) {
+      return data.exercise_weights as unknown as ExerciseWeights
+    }
+  }
+
+  // Fallback: any last attended session with weights
+  const { data } = await supabase
+    .from('attendance')
+    .select('exercise_weights')
+    .eq('client_id', clientId)
+    .eq('status', 'attended')
+    .not('exercise_weights', 'is', null)
+    .order('scheduled_date', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (data?.exercise_weights) {
+    return data.exercise_weights as unknown as ExerciseWeights
+  }
+
+  return null
 }
 
 // ─── Mutations ────────────────────────────────────────────────────────────────

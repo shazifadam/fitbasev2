@@ -44,7 +44,7 @@ export function MoreView({ profile }: Props) {
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">
-      <div className="flex flex-col gap-6 px-4 pt-12 pb-6">
+      <div className="flex flex-col gap-6 px-4 pt-6 pb-6">
 
         {/* Header */}
         <div className="flex flex-col gap-0.5">
@@ -96,12 +96,12 @@ export function MoreView({ profile }: Props) {
             <HugeiconsIcon icon={ArrowRight01Icon} size={16} color="currentColor" className="text-neutral-400" />
           </Link>
           <Link
-            href="/workouts"
+            href="/more/programs"
             className="flex items-center justify-between px-4 py-3.5 border-b border-neutral-100"
           >
             <div className="flex items-center gap-3">
               <HugeiconsIcon icon={Notebook02Icon} size={20} color="currentColor" className="text-neutral-500" />
-              <span className="text-[15px] font-normal text-neutral-950">Workout Programs</span>
+              <span className="text-[15px] font-normal text-neutral-950">Training Programs</span>
             </div>
             <HugeiconsIcon icon={ArrowRight01Icon} size={16} color="currentColor" className="text-neutral-400" />
           </Link>

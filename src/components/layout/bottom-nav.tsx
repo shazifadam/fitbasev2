@@ -98,7 +98,7 @@ export function BottomNav() {
 
       {/* Nav Bar */}
       <nav className="fixed bottom-0 left-1/2 z-40 w-full max-w-[428px] -translate-x-1/2 bg-white border-t border-neutral-200 shadow-nav pb-safe">
-        <div className="flex items-center justify-around px-2 pt-2 pb-2">
+        <div className="flex items-center justify-around px-2 pt-2 pb-3">
           {navItems.map((item, index) => {
             const isActive = pathname.startsWith(item.href)
 

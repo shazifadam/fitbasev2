@@ -170,7 +170,7 @@ export function DashboardView({ date, attendance, trainerName, trainerId }: Prop
   if (!dateConfirmed) {
     return (
       <main className="min-h-screen bg-neutral-100 pb-24">
-        <div className="flex flex-col gap-6 px-4 pt-12 pb-6">
+        <div className="flex flex-col gap-6 px-4 pt-6 pb-6">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-0.5">
               <span className="text-[13px] font-normal text-neutral-500">Welcome Back</span>
@@ -185,7 +185,7 @@ export function DashboardView({ date, attendance, trainerName, trainerId }: Prop
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-24">
-      <div className="flex flex-col gap-6 px-4 pt-12 pb-6">
+      <div className="flex flex-col gap-6 px-4 pt-6 pb-6">
 
         {/* Header */}
         <div className="flex items-center justify-between">

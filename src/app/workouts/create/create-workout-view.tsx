@@ -330,7 +330,7 @@ export function CreateWorkoutView({ exercises, clientId = null }: Props) {
 
   return (
     <main className="min-h-screen bg-neutral-100 pb-32 overflow-x-hidden">
-      <div className="flex flex-col gap-6 px-4 pt-12 pb-6 min-w-0">
+      <div className="flex flex-col gap-6 px-4 pt-6 pb-6 min-w-0">
 
         {/* Header */}
         <button onClick={() => router.back()} className="flex items-center gap-2 self-start -ml-2 px-2 py-2 rounded-base active:bg-neutral-200">
