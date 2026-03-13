@@ -46,6 +46,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(dashboardUrl)
   }
 
+  // Onboarding redirect — read onboarding_completed from JWT claim (no DB call)
+  if (user) {
+    let onboardingCompleted = true // default to true (safe fallback)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        const payload = JSON.parse(atob(session.access_token.split('.')[1]))
+        onboardingCompleted = payload.onboarding_completed === true
+      }
+    } catch {
+      // JWT decode failed — skip onboarding check
+    }
+
+    if (!onboardingCompleted && !pathname.startsWith('/onboarding') && !isPublicRoute) {
+      const onboardingUrl = request.nextUrl.clone()
+      onboardingUrl.pathname = '/onboarding'
+      return NextResponse.redirect(onboardingUrl)
+    }
+
+    if (onboardingCompleted && pathname.startsWith('/onboarding')) {
+      const dashboardUrl = request.nextUrl.clone()
+      dashboardUrl.pathname = '/dashboard'
+      return NextResponse.redirect(dashboardUrl)
+    }
+  }
+
   return supabaseResponse
 }
 
