@@ -32,6 +32,7 @@ export default async function DashboardPage({
         date={date}
         attendance={attendance}
         trainerName={trainer?.display_name ?? 'Trainer'}
+        trainerId={trainer?.id ?? ''}
       />
       <BottomNav />
     </>

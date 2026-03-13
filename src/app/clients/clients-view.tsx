@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { HugeiconsIcon, Search01Icon, DragDropVerticalIcon } from '@/components/ui/icon'
 import type { ClientRow } from '@/actions/clients'
 
@@ -26,7 +26,6 @@ type Props = {
 
 export function ClientsView({ clients, trainerInitials, initialSearch, initialFilter }: Props) {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [search, setSearch] = useState(initialSearch)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 

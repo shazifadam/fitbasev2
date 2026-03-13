@@ -8,6 +8,7 @@ import { HugeiconsIcon, Calendar01Icon, DragDropVerticalIcon, CheckmarkCircle01I
 import { undoAttendance } from '@/actions/session'
 import { Spinner } from '@/components/ui/spinner'
 import type { AttendanceWithClient } from '@/actions/dashboard'
+import { AttendingCount } from '@/components/dashboard/attending-count'
 
 const SessionActionDrawer = dynamic(
   () => import('@/components/dashboard/session-action-drawer').then(m => m.SessionActionDrawer),
@@ -116,9 +117,10 @@ type Props = {
   date: string
   attendance: AttendanceWithClient[]
   trainerName: string
+  trainerId: string
 }
 
-export function DashboardView({ date, attendance, trainerName }: Props) {
+export function DashboardView({ date, attendance, trainerName, trainerId }: Props) {
   const router = useRouter()
   const [selectedItem, setSelectedItem] = useState<AttendanceWithClient | null>(null)
   const [showWorkoutDrawer, setShowWorkoutDrawer] = useState(false)
@@ -219,9 +221,7 @@ export function DashboardView({ date, attendance, trainerName }: Props) {
           >
             <span className="text-[15px] font-medium text-white">Attending</span>
             <div className="flex items-center justify-center rounded-full bg-white/[0.13] px-[14px] py-[6px]">
-              <span className="text-[13px] font-medium text-white">
-                {attending.length} attending
-              </span>
+              <AttendingCount initialCount={attending.length} trainerId={trainerId} date={date} />
             </div>
           </Link>
         )}

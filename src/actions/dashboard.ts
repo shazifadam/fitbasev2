@@ -118,6 +118,7 @@ export async function getAttendanceForDate(date: string): Promise<AttendanceWith
 }
 
 export type TrainerProfile = {
+  id: string
   display_name: string | null
   photo_url: string | null
 }
@@ -129,7 +130,7 @@ export async function getTrainerProfile(): Promise<TrainerProfile | null> {
 
   const { data } = await supabase
     .from('users')
-    .select('display_name, photo_url')
+    .select('id, display_name, photo_url')
     .eq('auth_id', user.id)
     .single()
 
