@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HugeiconsIcon, UserGroupIcon, Calendar01Icon, Dumbbell01Icon, Money01Icon, BarChartIcon, CheckmarkCircle01Icon } from '@/components/ui/icon'
 import { completeOnboarding } from '@/actions/onboarding'
 import { createClient } from '@/lib/supabase/client'
-import { Spinner } from '@/components/ui/spinner'
 import { screens } from './screens'
 
 // ─── Icon map ────────────────────────────────────────────────────────────────
@@ -19,51 +18,9 @@ const iconMap: Record<string, typeof UserGroupIcon> = {
   stats: BarChartIcon,
 }
 
-// ─── Loading messages ────────────────────────────────────────────────────────
-
-const loadingMessages = [
-  'Setting up your client base...',
-  'Warming up the dumbbells...',
-  'Counting your future payments...',
-  'Stretching the spreadsheets...',
-  'Syncing your gains...',
-  'Almost there...',
-]
-
 // ─── Swipe threshold ─────────────────────────────────────────────────────────
 
 const SWIPE_THRESHOLD = 50
-
-// ─── Loading Screen ──────────────────────────────────────────────────────────
-
-function LoadingScreen() {
-  const [msgIndex, setMsgIndex] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMsgIndex(i => (i + 1) % loadingMessages.length)
-    }, 1800)
-    return () => clearInterval(interval)
-  }, [])
-
-  return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 bg-neutral-950">
-      <Spinner className="text-white h-8 w-8" />
-      <AnimatePresence mode="wait">
-        <motion.p
-          key={msgIndex}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }}
-          className="text-base font-normal text-neutral-400"
-        >
-          {loadingMessages[msgIndex]}
-        </motion.p>
-      </AnimatePresence>
-    </div>
-  )
-}
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -73,7 +30,6 @@ export function OnboardingFlow({ trainerName }: Props) {
   const [step, setStep] = useState(0)
   const [direction, setDirection] = useState(1)
   const [isPending, startTransition] = useTransition()
-  const [isFinishing, setIsFinishing] = useState(false)
 
   const screen = screens[step]
   const title = typeof screen.title === 'function' ? screen.title(trainerName) : screen.title
@@ -90,17 +46,16 @@ export function OnboardingFlow({ trainerName }: Props) {
     if (step < screens.length - 1) {
       goTo(step + 1, 1)
     } else {
-      // Final screen — show loading screen, complete onboarding, redirect
-      setIsFinishing(true)
+      // Final screen — complete onboarding, then redirect
       startTransition(async () => {
+        // Signal the loader overlay (lives in root layout) to show immediately
+        sessionStorage.setItem('fitbase_onboarding_loading', '1')
+
         await completeOnboarding()
         // Refresh JWT so middleware sees onboarding_completed = true
         const supabase = createClient()
         await supabase.auth.refreshSession()
-        // Small delay so the loading messages feel intentional
-        await new Promise(r => setTimeout(r, 3000))
         // Full navigation — ob=1 bypasses middleware onboarding check
-        // in case the refreshed JWT cookie hasn't propagated yet
         window.location.href = '/dashboard?ob=1'
       })
     }
@@ -117,10 +72,6 @@ export function OnboardingFlow({ trainerName }: Props) {
       goTo(step - 1, -1)
     }
   }
-
-  // ─── Loading screen ────────────────────────────────────────────────────────
-
-  if (isFinishing) return <LoadingScreen />
 
   // ─── Animation variants ──────────────────────────────────────────────────
 
@@ -224,7 +175,7 @@ export function OnboardingFlow({ trainerName }: Props) {
           disabled={isPending}
           className="flex h-[52px] w-full items-center justify-center rounded-base bg-neutral-800 text-base font-normal text-white disabled:opacity-50"
         >
-          {screen.ctaLabel}
+          {isPending ? 'Loading\u2026' : screen.ctaLabel}
         </button>
 
         {/* Skip link */}
