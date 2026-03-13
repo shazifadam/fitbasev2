@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerClientUntyped } from '@/lib/supabase/server'
+import { createServerClientUntyped, getTrainerId } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -15,15 +15,15 @@ export type TrainerProfileDetail = {
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 export async function getTrainerProfileDetail(): Promise<TrainerProfileDetail | null> {
-  const supabase = await createServerClientUntyped()
+  const trainerId = await getTrainerId()
+  if (!trainerId) return null
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  const supabase = await createServerClientUntyped()
 
   const { data } = await supabase
     .from('users')
     .select('id, display_name, email, photo_url')
-    .eq('auth_id', user.id)
+    .eq('id', trainerId)
     .single()
 
   return data as TrainerProfileDetail | null
@@ -34,15 +34,15 @@ export async function getTrainerProfileDetail(): Promise<TrainerProfileDetail | 
 export async function updateTrainerProfile(input: {
   display_name: string
 }): Promise<{ error?: string }> {
-  const supabase = await createServerClientUntyped()
+  const trainerId = await getTrainerId()
+  if (!trainerId) return { error: 'Not authenticated' }
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
+  const supabase = await createServerClientUntyped()
 
   const { error } = await supabase
     .from('users')
     .update({ display_name: input.display_name.trim() })
-    .eq('auth_id', user.id)
+    .eq('id', trainerId)
 
   if (error) return { error: error.message }
 

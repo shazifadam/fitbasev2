@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerClientUntyped } from '@/lib/supabase/server'
+import { createServerClientUntyped, getTrainerId } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -111,15 +111,10 @@ export async function getClients(opts?: {
 }
 
 export async function getTiers(): Promise<TierRow[]> {
+  const trainerId = await getTrainerId()
+  if (!trainerId) return []
+
   const supabase = await createServerClientUntyped()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
-
-  const { data: trainer } = await supabase
-    .from('users').select('id').eq('auth_id', user.id).single()
-  if (!trainer) return []
-
-  const trainerId = (trainer as { id: string }).id
 
   const { data: existing } = await supabase
     .from('tiers')
@@ -155,7 +150,7 @@ export type ClientDetail = {
   current_fat_percent: number | null
   current_height: number | null
   created_at: string | null
-  tiers: { name: string } | null
+  tiers: { name: string; amount: number } | null
 }
 
 export type AttendanceHistoryRow = {
@@ -176,7 +171,7 @@ export async function getClientDetail(clientId: string): Promise<ClientDetail | 
       id, name, phone, training_programs, schedule_set, custom_days,
       session_times, tier_id, current_weight, current_waist,
       current_fat_percent, current_height, created_at,
-      tiers(name)
+      tiers(name, amount)
     `)
     .eq('id', clientId)
     .single()
@@ -295,19 +290,11 @@ export async function getClientWorkouts(clientId: string): Promise<ClientWorkout
 export async function createClient(
   input: CreateClientInput
 ): Promise<{ error?: string }> {
-  const supabase = await createServerClientUntyped()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const { data: trainer } = await supabase
-    .from('users')
-    .select('id')
-    .eq('auth_id', user.id)
-    .single()
-
-  if (!trainer) return { error: 'Trainer profile not found. Please sign out and sign in again.' }
-
-  const trainerId = (trainer as { id: string }).id
+  const [trainerId, supabase] = await Promise.all([
+    getTrainerId(),
+    createServerClientUntyped(),
+  ])
+  if (!trainerId) return { error: 'Not authenticated' }
 
   const { data: client, error } = await supabase
     .from('clients')
@@ -352,15 +339,11 @@ export async function updateClient(
   clientId: string,
   input: CreateClientInput,
 ): Promise<{ error?: string }> {
-  const supabase = await createServerClientUntyped()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const { data: trainer } = await supabase
-    .from('users').select('id').eq('auth_id', user.id).single()
-  if (!trainer) return { error: 'Trainer not found' }
-
-  const trainerId = (trainer as { id: string }).id
+  const [trainerId, supabase] = await Promise.all([
+    getTrainerId(),
+    createServerClientUntyped(),
+  ])
+  if (!trainerId) return { error: 'Not authenticated' }
 
   const { error } = await supabase
     .from('clients')

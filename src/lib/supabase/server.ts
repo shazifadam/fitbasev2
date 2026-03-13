@@ -1,5 +1,6 @@
 import { createServerClient as createSupabaseServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { cache } from 'react'
 import type { Database } from '@/types/supabase'
 
 async function cookieConfig() {
@@ -42,3 +43,21 @@ export async function createServerClientUntyped() {
     config
   )
 }
+
+// ─── Cached trainer ID lookup ────────────────────────────────────────────────
+// React cache() deduplicates within a single request — so multiple server
+// actions that need the trainer ID share a single DB round-trip.
+
+export const getTrainerId = cache(async (): Promise<string | null> => {
+  const supabase = await createServerClientUntyped()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data: trainer } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', user.id)
+    .single()
+
+  return (trainer as { id: string } | null)?.id ?? null
+})

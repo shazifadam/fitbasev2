@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerClientUntyped } from '@/lib/supabase/server'
+import { createServerClientUntyped, getTrainerId } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -45,21 +45,23 @@ export type PreviousMeasurement = {
 export async function getProgressHistory(clientId: string): Promise<ProgressHistoryData | null> {
   const supabase = await createServerClientUntyped()
 
-  const { data: client } = await supabase
-    .from('clients')
-    .select('id, name, training_programs')
-    .eq('id', clientId)
-    .single()
+  // Fetch client and entries in parallel
+  const [{ data: client }, { data: entries }] = await Promise.all([
+    supabase
+      .from('clients')
+      .select('id, name, training_programs')
+      .eq('id', clientId)
+      .single(),
+    supabase
+      .from('progress')
+      .select('id, client_id, weight, height, fat_percent, waist, recorded_at')
+      .eq('client_id', clientId)
+      .order('recorded_at', { ascending: false }),
+  ])
 
   if (!client) return null
 
   const c = client as { id: string; name: string; training_programs: string[] | null }
-
-  const { data: entries } = await supabase
-    .from('progress')
-    .select('id, client_id, weight, height, fat_percent, waist, recorded_at')
-    .eq('client_id', clientId)
-    .order('recorded_at', { ascending: false })
 
   return {
     client: { id: c.id, name: c.name, training_programs: c.training_programs },
@@ -123,16 +125,11 @@ export async function getProgressTrend(clientId: string): Promise<ProgressTrend>
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 export async function recordProgress(input: RecordProgressInput): Promise<{ error?: string }> {
-  const supabase = await createServerClientUntyped()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const { data: trainer } = await supabase
-    .from('users').select('id').eq('auth_id', user.id).single()
-  if (!trainer) return { error: 'Trainer not found' }
-
-  const trainerId = (trainer as { id: string }).id
+  const [trainerId, supabase] = await Promise.all([
+    getTrainerId(),
+    createServerClientUntyped(),
+  ])
+  if (!trainerId) return { error: 'Not authenticated' }
 
   const { error } = await supabase
     .from('progress')

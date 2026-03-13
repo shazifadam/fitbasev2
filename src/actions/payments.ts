@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerClientUntyped } from '@/lib/supabase/server'
+import { createServerClientUntyped, getTrainerId } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -45,12 +45,19 @@ export type RecordPaymentInput = {
 export async function getPaymentHistory(clientId: string): Promise<PaymentHistoryData | null> {
   const supabase = await createServerClientUntyped()
 
-  // Fetch client with tier info
-  const { data: client } = await supabase
-    .from('clients')
-    .select('id, name, tier_id, tiers(name, amount)')
-    .eq('id', clientId)
-    .single()
+  // Fetch client and payments in parallel
+  const [{ data: client }, { data: payments }] = await Promise.all([
+    supabase
+      .from('clients')
+      .select('id, name, tier_id, tiers(name, amount)')
+      .eq('id', clientId)
+      .single(),
+    supabase
+      .from('payments')
+      .select('id, client_id, tier_id, amount, currency, payment_date, valid_until, created_at')
+      .eq('client_id', clientId)
+      .order('payment_date', { ascending: false }),
+  ])
 
   if (!client) return null
 
@@ -61,19 +68,11 @@ export async function getPaymentHistory(clientId: string): Promise<PaymentHistor
     tiers: { name: string; amount: number } | null
   }
 
-  // Fetch all payments ordered by date desc
-  const { data: payments } = await supabase
-    .from('payments')
-    .select('id, client_id, tier_id, amount, currency, payment_date, valid_until, created_at')
-    .eq('client_id', clientId)
-    .order('payment_date', { ascending: false })
-
   const rows = (payments ?? []) as PaymentRow[]
 
   const totalPaid = rows.reduce((sum, p) => sum + Number(p.amount), 0)
   const currency = rows[0]?.currency ?? 'MVR'
 
-  // Calculate pending: tier amount if latest payment is overdue or no payments exist
   const tierAmount = c.tiers?.amount ?? 0
   let pending = 0
   if (rows.length === 0) {
@@ -105,16 +104,11 @@ export async function getPaymentHistory(clientId: string): Promise<PaymentHistor
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 export async function recordPayment(input: RecordPaymentInput): Promise<{ error?: string }> {
-  const supabase = await createServerClientUntyped()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const { data: trainer } = await supabase
-    .from('users').select('id').eq('auth_id', user.id).single()
-  if (!trainer) return { error: 'Trainer not found' }
-
-  const trainerId = (trainer as { id: string }).id
+  const [trainerId, supabase] = await Promise.all([
+    getTrainerId(),
+    createServerClientUntyped(),
+  ])
+  if (!trainerId) return { error: 'Not authenticated' }
 
   // Get client's tier_id
   const { data: client } = await supabase
@@ -123,7 +117,6 @@ export async function recordPayment(input: RecordPaymentInput): Promise<{ error?
     .eq('id', input.client_id)
     .single()
 
-  // payment_date = today (submission date), valid_until = +1 month from today
   const today = new Date()
   const paymentDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
   const validUntilDate = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate())

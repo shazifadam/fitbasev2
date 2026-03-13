@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerClientUntyped } from '@/lib/supabase/server'
+import { createServerClientUntyped, getTrainerId } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -27,16 +27,10 @@ export type UpdateTierInput = {
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 export async function getTiers(): Promise<TierDetail[]> {
+  const trainerId = await getTrainerId()
+  if (!trainerId) return []
+
   const supabase = await createServerClientUntyped()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
-
-  const { data: trainer } = await supabase
-    .from('users').select('id').eq('auth_id', user.id).single()
-  if (!trainer) return []
-
-  const trainerId = (trainer as { id: string }).id
 
   const { data } = await supabase
     .from('tiers')
@@ -50,16 +44,10 @@ export async function getTiers(): Promise<TierDetail[]> {
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 export async function createTier(input: CreateTierInput): Promise<{ error?: string }> {
+  const trainerId = await getTrainerId()
+  if (!trainerId) return { error: 'Not authenticated' }
+
   const supabase = await createServerClientUntyped()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const { data: trainer } = await supabase
-    .from('users').select('id').eq('auth_id', user.id).single()
-  if (!trainer) return { error: 'Trainer not found' }
-
-  const trainerId = (trainer as { id: string }).id
 
   const { error } = await supabase
     .from('tiers')

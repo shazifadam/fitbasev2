@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerClient, createServerClientUntyped } from '@/lib/supabase/server'
+import { createServerClient, createServerClientUntyped, getTrainerId } from '@/lib/supabase/server'
 
 export type AttendanceWithClient = {
   id: string
@@ -34,16 +34,10 @@ const DAY_ABBR_TO_NUM: Record<string, number> = {
  * pre-generated records may not cover today's date.
  */
 async function ensureAttendanceForDate(date: string) {
+  const trainerId = await getTrainerId()
+  if (!trainerId) return
+
   const supabase = await createServerClientUntyped()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return
-
-  const { data: trainer } = await supabase
-    .from('users').select('id').eq('auth_id', user.id).single()
-  if (!trainer) return
-
-  const trainerId = (trainer as { id: string }).id
 
   // Which day-of-week is `date`?
   const [y, m, d] = date.split('-').map(Number)
@@ -51,39 +45,32 @@ async function ensureAttendanceForDate(date: string) {
   const dayAbbr = Object.entries(DAY_ABBR_TO_NUM).find(([, n]) => n === dayOfWeek)?.[0]
   if (!dayAbbr) return
 
-  // Get all active clients for this trainer whose schedule includes today's day
-  const { data: clients } = await supabase
-    .from('clients')
-    .select('id, schedule_set, custom_days, session_times')
-    .eq('trainer_id', trainerId)
-    .eq('is_archived', false)
+  // Fetch clients and existing attendance in parallel
+  const [{ data: clients }, { data: existing }] = await Promise.all([
+    supabase
+      .from('clients')
+      .select('id, schedule_set, custom_days, session_times')
+      .eq('trainer_id', trainerId)
+      .eq('is_archived', false),
+    supabase
+      .from('attendance')
+      .select('client_id')
+      .eq('scheduled_date', date),
+  ])
 
   if (!clients || clients.length === 0) return
 
-  // Filter to clients who should train on this day
-  const scheduledClients = (clients as { id: string; schedule_set: string; custom_days: string[] | null; session_times: Record<string, string> | null }[])
+  const existingSet = new Set((existing ?? []).map((r: { client_id: string }) => r.client_id))
+
+  // Filter to clients who should train on this day AND don't have records yet
+  const missing = (clients as { id: string; schedule_set: string; custom_days: string[] | null; session_times: Record<string, string> | null }[])
     .filter(c => {
+      if (existingSet.has(c.id)) return false
       const days = c.schedule_set === 'custom'
         ? (c.custom_days ?? [])
         : (SCHEDULE_DAYS[c.schedule_set] ?? [])
       return days.includes(dayAbbr)
     })
-
-  if (scheduledClients.length === 0) return
-
-  // Check which already have records for this date
-  const clientIds = scheduledClients.map(c => c.id)
-  const { data: existing } = await supabase
-    .from('attendance')
-    .select('client_id')
-    .eq('scheduled_date', date)
-    .in('client_id', clientIds)
-
-  const existingSet = new Set((existing ?? []).map((r: { client_id: string }) => r.client_id))
-
-  // Create missing records
-  const missing = scheduledClients
-    .filter(c => !existingSet.has(c.id))
     .map(c => ({
       client_id: c.id,
       trainer_id: trainerId,
@@ -124,14 +111,14 @@ export type TrainerProfile = {
 }
 
 export async function getTrainerProfile(): Promise<TrainerProfile | null> {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  const supabase = await createServerClientUntyped()
+  const trainerId = await getTrainerId()
+  if (!trainerId) return null
 
   const { data } = await supabase
     .from('users')
     .select('id, display_name, photo_url')
-    .eq('auth_id', user.id)
+    .eq('id', trainerId)
     .single()
 
   return data as TrainerProfile | null

@@ -9,10 +9,13 @@ export default async function RecordProgressFormPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const client = await getClientDetail(id)
-  if (!client) redirect('/progress/record')
 
-  const previous = await getPreviousMeasurement(id)
+  const [client, previous] = await Promise.all([
+    getClientDetail(id),
+    getPreviousMeasurement(id),
+  ])
+
+  if (!client) redirect('/progress/record')
 
   return (
     <RecordProgressForm

@@ -1,6 +1,5 @@
 import { redirect, notFound } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
-import { createServerClientUntyped } from '@/lib/supabase/server'
 import {
   getClientDetail,
   getClientAttendance,
@@ -32,13 +31,8 @@ export default async function ClientDetailPage({
 
   if (!client) notFound()
 
-  // Fetch tier amount for pre-filling payment drawer
-  let tierAmount: number | null = null
-  if (client.tier_id) {
-    const sb = await createServerClientUntyped()
-    const { data: tier } = await sb.from('tiers').select('amount').eq('id', client.tier_id).single()
-    if (tier) tierAmount = (tier as { amount: number }).amount
-  }
+  // Tier amount is now included in the client detail join
+  const tierAmount = client.tiers?.amount ?? null
 
   return (
     <>

@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerClientUntyped } from '@/lib/supabase/server'
+import { createServerClientUntyped, getTrainerId } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -126,15 +126,10 @@ export async function getWorkoutDetail(workoutId: string): Promise<WorkoutDetail
 export async function createWorkout(
   input: CreateWorkoutInput
 ): Promise<{ id?: string; error?: string }> {
+  const trainerId = await getTrainerId()
+  if (!trainerId) return { error: 'Not authenticated' }
+
   const supabase = await createServerClientUntyped()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const { data: trainer } = await supabase
-    .from('users').select('id').eq('auth_id', user.id).single()
-  if (!trainer) return { error: 'Trainer not found' }
-
-  const trainerId = (trainer as { id: string }).id
 
   const { data: workout, error: wErr } = await supabase
     .from('workouts')
